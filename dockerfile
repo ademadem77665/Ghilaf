@@ -1,0 +1,19 @@
+FROM node:18-bullseye
+
+# تثبيت Java 17 والأدوات المطلوبة تلقائياً في السيرفر السحابي
+RUN apt-get update && apt-get install -y \
+    openjdk-17-jdk \
+    wget \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
+EXPOSE 3000
+
+CMD ["npm", "start"]
