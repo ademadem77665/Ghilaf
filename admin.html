@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>الإدارة | غلاف</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Readex+Pro:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
+</head>
+<body>
+<header class="top" id="hdr"></header>
+<main class="wrap">
+  <div class="page-h"><h1>لوحة الإدارة</h1><div class="seg" id="tabs" role="tablist">
+    <button data-t="stats" aria-pressed="true">الإحصاءات</button><button data-t="users" aria-pressed="false">المستخدمون</button>
+    <button data-t="apps" aria-pressed="false">التطبيقات</button><button data-t="builds" aria-pressed="false">البناءات</button></div></div>
+  <div id="view"><p class="muted">جارٍ التحميل...</p></div>
+</main>
+<script src="/assets/app.js"></script>
+<script>
+(function () {
+  var view = document.getElementById('view'), me = null, tab = 'stats', esc = G.esc, plans = {};
+  var PL = { free: 'مجانية', basic: 'أساسية', pro: 'احترافية' };
+  function err(e) { G.toast(e.message || 'حدث خطأ.'); }
+
+  function setTab(t) {
+    tab = t;
+    [].forEach.call(document.querySelectorAll('#tabs button'), function (b) { b.setAttribute('aria-pressed', b.dataset.t === t); });
+    load();
+  }
+  document.getElementById('tabs').onclick = function (e) { var b = e.target.closest('button'); if (b) setTab(b.dataset.t); };
+
+  function load() {
+    view.innerHTML = '<p class="muted">جارٍ التحميل...</p>';
+    ({ stats: stats, users: users, apps: apps, builds: builds })[tab]().catch(function (e) {
+      view.innerHTML = '<div class="card empty"><h3>تعذّر التحميل</h3><p>' + esc(e.message) + '</p></div>';
+    });
+  }
+
+  function stats() {
+    return G.api('/admin/stats').then(function (s) {
+      var by = s.buildsByStatus || {};
+      var tiles = [['المستخدمون', s.users], ['مشتركون فعّالون', s.paidActive], ['ينتهي اشتراكهم خلال 7 أيام', s.expiringSoon], ['التطبيقات', s.apps], ['مستخدمون جدد (7 أيام)', s.newUsers7d], ['بناءات (7 أيام)', s.builds7d],
+        ['في الطابور', by.queued || 0], ['قيد البناء', by.building || 0], ['ناجحة', by.ready || 0], ['فاشلة', by.failed || 0]];
+      view.innerHTML = '<div class="stats">' + tiles.map(function (t) { return '<div class="card stat"><span class="muted sm-t">' + t[0] + '</span><b>' + t[1] + '</b></div>'; }).join('') + '</div>' +
+        (s.expiringSoon ? '<p class="alert warn" style="margin-top:16px">يوجد ' + s.expiringSoon + ' اشتراك ينتهي خلال أسبوع. افتح «المستخدمون» لتجديدهم بعد استلام الدفع.</p>' : '');
+    });
+  }
+
+  function users(q) {
+    return G.api('/admin/users?q=' + encodeURIComponent(q || '')).then(function (r) {
+      view.innerHTML = '<div class="row" style="margin-bottom:12px"><input class="inp" id="q" placeholder="بحث بالبريد أو الاسم" style="max-width:320px" value="' + esc(q || '') + '"><button class="btn" id="qb">بحث</button></div>' +
+        '<div class="tbl-wrap"><table><thead><tr><th>المستخدم</th><th>الخطة</th><th>ينتهي</th><th>التطبيقات</th><th>الحالة</th><th></th></tr></thead><tbody>' +
+        r.users.map(function (u) {
+          var expired = u.plan !== 'free' && u.planExpires && u.planExpires < Date.now();
+          return '<tr><td><b>' + esc(u.name) + '</b>' + (u.role === 'admin' ? ' <span class="pill info">مدير</span>' : '') + '<div class="mono muted">' + esc(u.email) + '</div></td>' +
+            '<td>' + esc(PL[u.plan] || u.plan) + '</td><td>' + (u.plan === 'free' ? '—' : G.date(u.planExpires) + (expired ? ' <span class="pill bad">منتهٍ</span>' : '')) + '</td><td>' + u.apps + '</td>' +
+            '<td>' + (u.disabled ? '<span class="pill bad">موقوف</span>' : '<span class="pill ok">فعّال</span>') + '</td>' +
+            '<td><button class="btn sm" data-u="' + u.id + '" data-json="' + esc(JSON.stringify(u)) + '">إدارة</button></td></tr>';
+        }).join('') + '</tbody></table></div>';
+      var go = function () { users(document.getElementById('q').value.trim()); };
+      document.getElementById('qb').onclick = go;
+      document.getElementById('q').onkeydown = function (e) { if (e.key === 'Enter') go(); };
+      view.onclick = function (e) {
+        var b = e.target.closest('[data-u]'); if (b) editUser(JSON.parse(b.dataset.json), q);
+      };
+    });
+  }
+
+  function editUser(u, q) {
+    var def = u.planExpires && u.planExpires > Date.now() ? G.isoDay(u.planExpires) : G.isoDay(Date.now() + 30 * 86400000);
+    var m = G.modal('<h2>إدارة: ' + esc(u.name) + '</h2><p class="mono muted" style="margin-bottom:14px">' + esc(u.email) + '</p><form class="form" id="uf">' +
+      '<div class="field"><label for="up">الخطة</label><select class="inp" id="up">' + Object.keys(PL).map(function (k) { return '<option value="' + k + '"' + (k === u.plan ? ' selected' : '') + '>' + PL[k] + '</option>'; }).join('') + '</select></div>' +
+      '<div class="field" id="ue"><label for="ud">تاريخ انتهاء الاشتراك</label><input class="inp ltr" id="ud" type="date" value="' + def + '"><span class="hint">آخر لحظة من هذا اليوم. للتجديد الشهري أضف 30 يوماً من تاريخ الدفع.</span></div>' +
+      '<label class="row" style="gap:8px"><input type="checkbox" id="ux"' + (u.disabled ? ' checked' : '') + '> إيقاف الحساب (تتوقف تطبيقاته ويُسجَّل خروجه)</label>' +
+      '<div class="row"><button class="btn pri" type="submit">حفظ</button><button class="btn" type="button" id="uc">إلغاء</button></div></form>');
+    var sync = function () { m.el.querySelector('#ue').hidden = m.el.querySelector('#up').value === 'free'; };
+    m.el.querySelector('#up').onchange = sync; sync();
+    m.el.querySelector('#uc').onclick = m.close;
+    m.el.querySelector('#uf').onsubmit = function (e) {
+      e.preventDefault();
+      var plan = m.el.querySelector('#up').value;
+      var body = { plan: plan, disabled: m.el.querySelector('#ux').checked };
+      if (plan !== 'free') body.planExpires = m.el.querySelector('#ud').value;
+      G.api('/admin/users/' + u.id, { method: 'POST', body: body }).then(function () { m.close(); G.toast('تم الحفظ.'); users(q); }, err);
+    };
+  }
+
+  function apps() {
+    return G.api('/admin/apps').then(function (r) {
+      view.innerHTML = '<div class="tbl-wrap"><table><thead><tr><th>التطبيق</th><th>المالك</th><th>النوع</th><th>الحالة</th><th>أُنشئ</th><th></th></tr></thead><tbody>' +
+        (r.apps.length ? r.apps.map(function (a) {
+          return '<tr><td><b>' + esc(a.name) + '</b><div class="mono muted">' + esc(a.package) + '</div></td><td class="mono">' + esc(a.owner) + '</td><td>' + (a.source === 'zip' ? 'ملفات' : 'رابط') + '</td>' +
+            '<td>' + (a.status === 'active' ? '<span class="pill ok">فعّال</span>' : '<span class="pill bad">موقوف</span>') + '</td><td>' + G.date(a.createdAt) + '</td>' +
+            '<td class="row"><button class="btn sm" data-s="' + a.id + '" data-to="' + (a.status === 'active' ? 'suspended' : 'active') + '">' + (a.status === 'active' ? 'إيقاف' : 'تفعيل') + '</button>' +
+            '<button class="btn sm danger" data-d="' + a.id + '">حذف</button></td></tr>';
+        }).join('') : '<tr><td colspan="6" class="muted" style="text-align:center;padding:28px">لا توجد تطبيقات.</td></tr>') + '</tbody></table></div>';
+      view.onclick = function (e) {
+        var s = e.target.closest('[data-s]'), d = e.target.closest('[data-d]');
+        if (s) G.api('/admin/apps/' + s.dataset.s, { method: 'POST', body: { status: s.dataset.to } }).then(function () { G.toast(s.dataset.to === 'suspended' ? 'أُوقف التطبيق. تظهر لمستخدميه رسالة التواصل.' : 'تم تفعيل التطبيق.'); apps(); }, err);
+        if (d) {
+          if (d.dataset.sure !== '1') { d.dataset.sure = '1'; d.textContent = 'تأكيد الحذف'; return; }
+          G.api('/admin/apps/' + d.dataset.d, { method: 'DELETE' }).then(function () { G.toast('تم الحذف.'); apps(); }, err);
+        }
+      };
+    });
+  }
+
+  function builds(st) {
+    return G.api('/admin/builds' + (st ? '?status=' + st : '')).then(function (r) {
+      view.innerHTML = '<div class="row" style="margin-bottom:12px"><select class="inp" id="bs" style="max-width:220px"><option value="">كل الحالات</option>' +
+        Object.keys(G.STATUS).map(function (k) { return '<option value="' + k + '"' + (k === st ? ' selected' : '') + '>' + G.STATUS[k][0] + '</option>'; }).join('') + '</select></div>' +
+        '<div class="tbl-wrap"><table><thead><tr><th>#</th><th>التطبيق</th><th>الصيغة</th><th>الحالة</th><th>التاريخ</th><th></th></tr></thead><tbody>' +
+        (r.builds.length ? r.builds.map(function (b) {
+          return '<tr><td>' + b.id + '</td><td>' + esc(b.appName) + '</td><td>' + b.format.toUpperCase() + '</td><td>' + G.pill(b.status) + (b.error ? '<div class="hint">' + esc(b.error) + '</div>' : '') + '</td><td>' + G.dateTime(b.createdAt) + '</td>' +
+            '<td class="row"><button class="btn sm" data-l="' + b.id + '">السجل</button>' + (b.status === 'failed' ? '<button class="btn sm pri" data-r="' + b.id + '">إعادة المحاولة</button>' : '') + '</td></tr>';
+        }).join('') : '<tr><td colspan="6" class="muted" style="text-align:center;padding:28px">لا توجد عمليات بناء.</td></tr>') + '</tbody></table></div>';
+      document.getElementById('bs').onchange = function () { builds(this.value); };
+      var logs = {}; r.builds.forEach(function (b) { logs[b.id] = b.log; });
+      view.onclick = function (e) {
+        var l = e.target.closest('[data-l]'), re = e.target.closest('[data-r]');
+        if (l) { var m = G.modal('<h2>سجل البناء #' + l.dataset.l + '</h2><pre class="log">' + esc(logs[l.dataset.l] || 'لا يوجد سجل.') + '</pre><p style="margin-top:12px"><button class="btn" id="cl">إغلاق</button></p>'); m.el.querySelector('#cl').onclick = m.close; }
+        if (re) G.api('/admin/builds/' + re.dataset.r + '/retry', { method: 'POST', body: {} }).then(function () { G.toast('أُعيدت إلى الطابور.'); builds(st); }, err);
+      };
+    });
+  }
+
+  G.me().then(function (u) {
+    me = u;
+    if (!me) { location.href = '/#login'; return; }
+    if (me.role !== 'admin') { location.href = '/dashboard.html'; return; }
+    G.header('admin', me);
+    load();
+  }, function (e) { view.innerHTML = '<div class="card empty"><h3>تعذّر الاتصال</h3><p>' + esc(e.message) + '</p></div>'; });
+})();
+</script>
+</body>
+</html>

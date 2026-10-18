@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">__APP_NAME__</string>
+    <string name="err_title">لا يوجد اتصال بالإنترنت</string>
+    <string name="err_msg">تحقق من الاتصال ثم أعد المحاولة.</string>
+    <string name="retry">إعادة المحاولة</string>
+    <string name="exp_title">حدث خطأ</string>
+    <string name="exp_msg">يرجى التواصل مع المطوّر أو تجديد الاشتراك.</string>
+</resources>

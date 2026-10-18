@@ -1,0 +1,9 @@
+{
+  "appId": "template",
+  "appName": "Template",
+  "startUrl": "https://example.com",
+  "licenseUrl": "",
+  "contact": "",
+  "primaryColor": "#0B7A63",
+  "graceDays": 7
+}

@@ -1,0 +1,960 @@
+<title>غلاف</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Readex+Pro:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: workbench hero (live phone preview that rebuilds as you type), quiet lists below, one bold moment = the phone. */
+:root{
+  --bg:#F2F5F3; --surface:#FFFFFF; --surface-2:#E7EEEA; --fg:#12201A; --muted:#55655D; --line:#D3DDD7;
+  --accent:#0B7A63; --accent-fg:#FFFFFF; --accent-soft:#D8EEE6;
+  --warn:#8F5200; --warn-soft:#FBEBD0; --bad:#B3261E; --bad-soft:#F9DEDC; --phone:#17201C;
+  --shadow:0 1px 2px rgba(18,32,26,.06),0 12px 32px rgba(18,32,26,.10);
+  --f-display:"Readex Pro","IBM Plex Sans Arabic",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0C1411; --surface:#131E19; --surface-2:#1A2822; --fg:#E7F0EB; --muted:#9DB1A6; --line:#25362E;
+    --accent:#3FD3A6; --accent-fg:#06231A; --accent-soft:#143328;
+    --warn:#F0B45A; --warn-soft:#3A2B10; --bad:#F2918B; --bad-soft:#3B1B19; --phone:#2C3B34;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px rgba(0,0,0,.45); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0C1411; --surface:#131E19; --surface-2:#1A2822; --fg:#E7F0EB; --muted:#9DB1A6; --line:#25362E;
+  --accent:#3FD3A6; --accent-fg:#06231A; --accent-soft:#143328;
+  --warn:#F0B45A; --warn-soft:#3A2B10; --bad:#F2918B; --bad-soft:#3B1B19; --phone:#2C3B34;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px rgba(0,0,0,.45); color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.75;
+  padding-block:0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--bg)}
+h1,h2,h3{font-family:var(--f-display);line-height:1.3;margin:0;text-wrap:balance;font-weight:700}
+p{margin:0}
+a{color:inherit}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
+.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.wrap{max-width:1160px;margin-inline:auto}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* header */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:var(--bg);border-bottom:1px solid var(--line)}
+.top{margin-inline:calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding-inline:max(16px,env(safe-area-inset-left,0px))}
+.top .wrap{display:flex;align-items:center;gap:20px;min-height:64px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-family:var(--f-display);font-weight:700;font-size:22px}
+.brand-mark{width:34px;height:34px;border-radius:10px;background:var(--accent);color:var(--accent-fg);display:grid;place-items:center}
+.nav{display:flex;gap:4px;margin-inline-start:12px}
+.nav a{text-decoration:none;padding:8px 12px;border-radius:8px;color:var(--muted);font-weight:500}
+.nav a:hover{color:var(--fg);background:var(--surface-2)}
+.tools{margin-inline-start:auto;display:flex;align-items:center;gap:8px}
+.menu{position:relative}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-weight:600;text-decoration:none;transition:background .15s,border-color .15s}
+.btn:hover{border-color:var(--muted)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.btn.pri:hover{filter:brightness(1.06)}
+.btn.sm{min-height:40px;padding:0 14px}
+.btn[disabled]{opacity:.6;cursor:progress}
+.icon-btn{width:44px;height:44px;padding:0;border-radius:10px}
+.acct{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 12px 0 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-weight:600}
+.avatar{width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:700;font-size:14px;font-family:var(--f-display)}
+.panel{position:absolute;top:calc(100% + 8px);inset-inline-end:0;min-width:248px;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:8px;z-index:70}
+.panel[hidden]{display:none}
+.panel .who{padding:10px 12px 12px;border-bottom:1px solid var(--line);margin-bottom:6px}
+.panel .who b{display:block;font-family:var(--f-display)}
+.panel .who span{color:var(--muted);font-size:14px;overflow-wrap:anywhere}
+.mi{display:flex;align-items:center;gap:12px;width:100%;padding:10px 12px;border:0;background:none;border-radius:8px;text-align:start;text-decoration:none;font-size:15px;min-height:42px}
+.mi:hover{background:var(--surface-2)}
+.mi .i{color:var(--muted)}
+.mi.danger,.mi.danger .i{color:var(--bad)}
+.sep{height:1px;background:var(--line);margin:6px 4px}
+.only-narrow{display:none}
+.tag{margin-inline-start:auto;font-size:12px;color:var(--muted);background:var(--surface-2);padding:1px 8px;border-radius:99px}
+
+/* hero */
+.hero{padding-block:56px 72px}
+.hero .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,660px);gap:48px;align-items:center}
+.hero h1{font-size:clamp(34px,5vw,54px);letter-spacing:-.01em}
+.hero .lead{margin-top:20px;font-size:19px;color:var(--muted);max-width:34em}
+.hero .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+.checks{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:28px;padding:0;list-style:none;color:var(--muted);font-size:15px}
+.checks li{display:flex;align-items:center;gap:8px}
+.checks .i{color:var(--accent);width:18px;height:18px}
+
+.bench{background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:8px;overflow:hidden}
+.bench-form{padding:22px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.bench-stage{background:var(--surface-2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:22px 14px}
+.seg{display:flex;background:var(--surface-2);border-radius:10px;padding:4px;gap:4px}
+.seg button{flex:1;border:0;background:none;min-height:38px;border-radius:7px;font-weight:600;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:8px}
+.seg button[aria-pressed="true"],.seg button[aria-selected="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field label,.lbl{font-size:14px;font-weight:600}
+.inp{width:100%;min-height:44px;padding:0 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--fg);font:inherit}
+.inp:focus{outline:3px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+.inp[dir="ltr"]{text-align:left}
+.hint{font-size:13px;color:var(--muted)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.drop{border:2px dashed var(--line);border-radius:12px;padding:22px 14px;text-align:center;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;background:var(--bg)}
+.drop:hover,.drop.over{border-color:var(--accent);color:var(--fg)}
+.drop b{color:var(--fg);overflow-wrap:anywhere}
+.swatches{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sw{width:32px;height:32px;border-radius:50%;border:2px solid var(--surface);box-shadow:0 0 0 1px var(--line);padding:0;position:relative}
+.sw[aria-checked="true"]{box-shadow:0 0 0 2px var(--fg)}
+.sw input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.iconpick{display:flex;align-items:center;gap:12px}
+.iconpick .pv{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-weight:700;font-family:var(--f-display);color:#fff;background:var(--app,var(--accent)) center/cover no-repeat}
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.steps li{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--muted)}
+.steps .dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;flex:none}
+.steps li.on{color:var(--fg)}
+.steps li.on .dot{border-color:var(--accent);border-top-color:transparent;animation:spin .8s linear infinite}
+.steps li.done{color:var(--fg)}
+.steps li.done .dot{background:var(--accent);border-color:var(--accent);color:var(--accent-fg);animation:none}
+.steps li.done .dot .i{width:12px;height:12px;stroke-width:3}
+.steps li:not(.done) .dot .i{display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.result{border:1px solid var(--accent);background:var(--accent-soft);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.result .f{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.result code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;direction:ltr;unicode-bidi:embed;overflow-wrap:anywhere}
+.demo-note{font-size:12.5px;color:var(--muted);text-align:center}
+
+/* phone */
+.phone{width:216px;height:432px;border:7px solid var(--phone);border-radius:34px;background:var(--phone);position:relative;overflow:hidden;flex:none}
+.phone::after{content:"";position:absolute;top:7px;left:50%;transform:translateX(-50%);width:56px;height:14px;border-radius:99px;background:var(--phone);z-index:3}
+.screen{position:absolute;inset:0;border-radius:26px;overflow:hidden;background:#fff;color:#1b1b1b;display:flex;flex-direction:column;direction:rtl}
+.status{height:30px;display:flex;justify-content:space-between;align-items:flex-end;padding:0 16px 3px;font-size:10px;font-weight:600;background:var(--app,#0B7A63);color:var(--appfg,#fff)}
+.view{flex:1;min-height:0;display:none;flex-direction:column}
+.screen[data-view="site"] .v-site,.screen[data-view="splash"] .v-splash,.screen[data-view="expired"] .v-expired,.screen[data-view="ok"] .v-site{display:flex}
+.appbar{display:flex;align-items:center;gap:8px;padding:6px 12px 10px;background:var(--app,#0B7A63);color:var(--appfg,#fff);font-family:var(--f-display);font-weight:600;font-size:13px}
+.appbar .ic{width:22px;height:22px;border-radius:6px;background:rgba(255,255,255,.25) center/cover no-repeat;display:grid;place-items:center;font-size:11px}
+.site{padding:12px;display:flex;flex-direction:column;gap:9px;overflow:hidden}
+.site .host{font-family:var(--f-display);font-size:14px;font-weight:700;direction:ltr;text-align:right;overflow-wrap:anywhere}
+.site .ban{height:84px;border-radius:10px;background:var(--app,#0B7A63);opacity:.18}
+.site .ln{height:8px;border-radius:4px;background:#d9dedb}
+.site .ln.s{width:60%}
+.site .cards{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.site .cards i{height:56px;border-radius:8px;background:#e8ece9;display:block}
+.v-splash{align-items:center;justify-content:center;gap:12px;background:var(--app,#0B7A63);color:var(--appfg,#fff);text-align:center;padding:0 16px}
+.v-splash .big{width:76px;height:76px;border-radius:20px;background:rgba(255,255,255,.22) center/cover no-repeat;display:grid;place-items:center;font-size:34px;font-family:var(--f-display);font-weight:700}
+.v-splash b{font-family:var(--f-display);font-size:17px}
+.v-splash .bar{width:80px;height:3px;border-radius:2px;background:rgba(255,255,255,.3);overflow:hidden}
+.v-splash .bar::after{content:"";display:block;height:100%;width:40%;background:currentColor;animation:slide 1.4s ease-in-out infinite}
+@keyframes slide{0%{transform:translateX(250%)}100%{transform:translateX(-250%)}}
+.v-expired{align-items:center;justify-content:center;gap:10px;text-align:center;padding:0 18px;background:#fff}
+.v-expired .badge{width:54px;height:54px;border-radius:50%;background:#FBE3E0;color:#B3261E;display:grid;place-items:center}
+.v-expired .badge .i{width:28px;height:28px}
+.v-expired b{font-family:var(--f-display);font-size:16px}
+.v-expired p{font-size:12.5px;color:#4b5651;line-height:1.7}
+.v-expired .rb{margin-top:6px;border:1px solid #cfd8d3;background:#fff;border-radius:8px;padding:6px 14px;font-size:12px;color:#1b1b1b}
+.v-expired code{font-size:10px;color:#7b8781;direction:ltr}
+.pill-row{display:flex;gap:6px}
+.pill{border:1px solid var(--line);background:var(--surface);border-radius:99px;min-height:34px;padding:0 14px;font-size:13px;font-weight:600;color:var(--muted)}
+.pill[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+
+/* sections */
+section{scroll-margin-top:80px}
+.sec{padding-block:72px}
+.sec.alt{background:var(--surface);border-block:1px solid var(--line);margin-inline:calc(-1 * max(16px,env(safe-area-inset-left,0px)))}
+.sec.alt>.wrap{padding-inline:max(16px,env(safe-area-inset-left,0px))}
+.sec-h{max-width:40em;margin-bottom:40px}
+.sec-h h2{font-size:clamp(26px,3.6vw,38px)}
+.sec-h p{margin-top:12px;color:var(--muted);font-size:18px}
+.flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;counter-reset:s}
+.flow>div{padding:0 28px 0 0;border-inline-start:1px solid var(--line);padding-inline:28px;counter-increment:s}
+.flow>div:first-child{border-inline-start:0;padding-inline-start:0}
+.flow .n{font-family:var(--f-display);font-weight:700;font-size:44px;color:var(--accent);line-height:1;margin-bottom:14px}
+.flow .n::before{content:counter(s)}
+.flow h3{font-size:20px;margin-bottom:8px}
+.flow p{color:var(--muted)}
+.feat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 40px}
+.feat article{padding:24px 0;border-top:1px solid var(--line);display:flex;gap:16px;min-width:0}
+.feat .ico{width:44px;height:44px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:none}
+.feat h3{font-size:18px;margin-bottom:4px}
+.feat p{color:var(--muted);font-size:15px}
+.chip{display:inline-block;font-size:12px;background:var(--surface-2);color:var(--muted);border-radius:99px;padding:0 8px;margin-inline-start:6px;font-family:var(--f-body);font-weight:500;vertical-align:middle}
+.lock{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:56px;align-items:center}
+.lock ul{margin:24px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:14px}
+.lock li{display:flex;gap:12px}
+.lock li .i{color:var(--accent);margin-top:4px}
+.sw-row{display:flex;align-items:center;gap:12px;margin-top:28px}
+.switch{width:54px;height:30px;border-radius:99px;border:0;background:var(--accent);position:relative;padding:0;transition:background .2s}
+.switch::after{content:"";position:absolute;top:3px;inset-inline-start:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .2s}
+.switch[aria-checked="true"]::after{transform:translateX(-24px)}
+.switch[aria-checked="false"]{background:var(--muted)}
+.lock-stage{display:flex;flex-direction:column;align-items:center;gap:14px}
+.bill{display:flex;gap:8px;margin-bottom:28px}
+.plans{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;align-items:stretch}
+.plan{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:28px;display:flex;flex-direction:column;gap:18px}
+.plan.hl{border:2px solid var(--accent);box-shadow:var(--shadow)}
+.plan h3{font-size:20px;display:flex;align-items:center;gap:8px}
+.plan .pr{font-family:var(--f-display);font-size:38px;font-weight:700;line-height:1}
+.plan .pr small{font-size:15px;color:var(--muted);font-weight:500;font-family:var(--f-body)}
+.plan ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;flex:1}
+.plan li{display:flex;gap:10px;font-size:15px}
+.plan li .i{color:var(--accent);width:18px;height:18px;margin-top:5px}
+.plan .best{font-size:12px;background:var(--accent);color:var(--accent-fg);border-radius:99px;padding:0 10px;font-family:var(--f-body);font-weight:600}
+.faq{max-width:820px}
+.faq details{border-top:1px solid var(--line);padding:4px 0}
+.faq details:last-child{border-bottom:1px solid var(--line)}
+.faq summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 0;font-weight:600;font-size:17px;min-height:44px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary .i{transition:transform .2s;color:var(--muted)}
+.faq details[open] summary .i{transform:rotate(180deg)}
+.faq details p{padding:0 0 18px;color:var(--muted);max-width:44em}
+.cta-band{background:var(--accent);color:var(--accent-fg);border-radius:24px;padding:48px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.cta-band h2{font-size:clamp(24px,3vw,32px);max-width:20em}
+.cta-band .btn{background:var(--accent-fg);color:var(--accent);border-color:var(--accent-fg)}
+footer{border-top:1px solid var(--line);margin-top:72px;padding-block:48px 40px}
+.fgrid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:32px}
+.fgrid h4{margin:0 0 12px;font-family:var(--f-display);font-size:15px}
+.fgrid a{display:block;text-decoration:none;color:var(--muted);padding:4px 0}
+.fgrid a:hover{color:var(--fg);text-decoration:underline}
+.fgrid p{color:var(--muted);font-size:15px;max-width:22em;margin-top:10px}
+.copy{margin-top:36px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted);font-size:14px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+/* legal views */
+.legal{padding-block:56px 24px}
+.legal .wrap{display:grid;grid-template-columns:220px minmax(0,1fr);gap:56px}
+.toc{position:sticky;top:calc(88px + env(safe-area-inset-top,0px));align-self:start;display:flex;flex-direction:column;gap:2px;border-inline-end:1px solid var(--line);padding-inline-end:20px}
+.toc b{font-family:var(--f-display);margin-bottom:8px}
+.toc a{text-decoration:none;color:var(--muted);padding:5px 0;font-size:14.5px}
+.toc a:hover{color:var(--fg)}
+.doc{max-width:46em}
+.doc h1{font-size:clamp(28px,4vw,40px)}
+.doc .meta{color:var(--muted);margin:8px 0 28px}
+.doc h2{font-size:21px;margin:36px 0 10px;scroll-margin-top:90px}
+.doc p,.doc li{color:var(--fg)}
+.doc ul{padding-inline-start:22px;margin:8px 0}
+.doc li{margin:4px 0}
+.doc .box{background:var(--accent-soft);border-radius:12px;padding:14px 16px;margin:20px 0;font-size:15px}
+.back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);text-decoration:none;margin-bottom:20px;font-weight:500}
+.back:hover{color:var(--fg)}
+
+/* modal + toast */
+.modal{position:fixed;inset:0;z-index:100;background:rgba(8,14,11,.55);display:grid;place-items:center;padding:16px}
+.modal[hidden]{display:none}
+.dlg{background:var(--surface);border:1px solid var(--line);border-radius:20px;width:min(440px,100%);max-height:calc(100% - 16px);overflow:auto;padding:28px;box-shadow:var(--shadow);position:relative}
+.dlg h2{font-size:24px;margin-bottom:6px}
+.dlg .sub{color:var(--muted);font-size:15px;margin-bottom:18px}
+.dlg form{display:flex;flex-direction:column;gap:14px;margin-top:16px}
+.x{position:absolute;top:14px;inset-inline-end:14px;width:40px;height:40px;border:0;background:none;border-radius:10px;display:grid;place-items:center;color:var(--muted)}
+.x:hover{background:var(--surface-2)}
+.err{color:var(--bad);font-size:14px;min-height:20px}
+.google{background:var(--surface);gap:10px}
+.or{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:13px}
+.or::before,.or::after{content:"";height:1px;background:var(--line);flex:1}
+.mail-line{display:flex;align-items:center;gap:8px;background:var(--surface-2);border-radius:10px;padding:8px 8px 8px 14px;margin-block:6px;direction:ltr;justify-content:space-between}
+.toast{position:fixed;inset-inline:0;bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:120;display:flex;justify-content:center;pointer-events:none}
+.toast span{background:var(--fg);color:var(--bg);padding:10px 18px;border-radius:10px;font-size:15px;box-shadow:var(--shadow);max-width:min(92vw,420px);opacity:0;transform:translateY(8px);transition:.2s}
+.toast.show span{opacity:1;transform:none}
+
+@media (max-width:1020px){
+  .hero .wrap{grid-template-columns:1fr}
+  .feat{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .lock{grid-template-columns:1fr;gap:36px}
+  .lock-stage{order:-1}
+}
+@media (max-width:860px){
+  .nav{display:none}
+  .only-narrow{display:block}
+  .plans{grid-template-columns:1fr}
+  .flow{grid-template-columns:1fr;gap:28px}
+  .flow>div,.flow>div:first-child{border:0;padding:0}
+  .fgrid{grid-template-columns:1fr 1fr}
+  .legal .wrap{grid-template-columns:1fr;gap:24px}
+  .toc{display:none}
+  .cta-band{padding:32px 24px}
+}
+@media (max-width:640px){
+  .bench{grid-template-columns:1fr}
+  .bench-stage{order:-1}
+  .feat{grid-template-columns:1fr}
+  .row2{grid-template-columns:1fr}
+  .acct .nm{display:none}
+  .acct{padding:0 6px 0 8px}
+  .hero{padding-block:32px 48px}
+  .sec{padding-block:52px}
+  .fgrid{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+  html{scroll-behavior:auto}
+}
+</style>
+
+<div id="app" dir="rtl" lang="ar">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+<symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></symbol>
+<symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></symbol>
+<symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></symbol>
+<symbol id="i-phone" viewBox="0 0 24 24"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M11 18h2"/></symbol>
+<symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18c1.3 0 2-.8 2-1.800 0-.5-.2-.9-.5-1.300-.3-.4-.5-.8-.5-1.300 0-1 .8-1.800 1.800-1.800H17a4 4 0 0 0 4-4c0-4.400-4-7.800-9-7.800z"/><circle cx="7.500" cy="11" r="1"/><circle cx="10.500" cy="7" r="1"/><circle cx="15.500" cy="7.500" r="1"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.500 8-8 9-4.500-1-8-4-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 6 2 7 2 7H4s2-1 2-7M10 20a2 2 0 0 0 4 0"/></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14-4L4 9M4 4v5h5M4 13a8 8 0 0 0 14 4l2-2M20 20v-5h-5"/></symbol>
+<symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 7l3 3M14 9l2 2"/></symbol>
+<symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></symbol>
+<symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.500"/><path d="M2.500 20c0-3.500 3-6 6.500-6s6.500 2.500 6.500 6M16 4.500a3.500 3.500 0 0 1 0 7M18 14c2.500.7 4 2.800 4 6"/></symbol>
+<symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></symbol>
+<symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.500 9.500a2.500 2.500 0 1 1 3.500 2.300c-.7.4-1 1-1 1.700M12 17h.01"/></symbol>
+<symbol id="i-dots" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.600" fill="currentColor"/><circle cx="12" cy="12" r="1.600" fill="currentColor"/><circle cx="12" cy="19" r="1.600" fill="currentColor"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.500-7 8-7s8 3 8 7"/></symbol>
+<symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></symbol>
+<symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4M16 8l4 4-4 4M20 12H9"/></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.500A8 8 0 0 1 9.500 4 8 8 0 1 0 20 14.500z"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.900 4.900l1.400 1.400M17.700 17.700l1.400 1.400M4.900 19.100l1.400-1.400M17.700 6.300l1.400-1.400"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.500l4.500 4.500L19 7.500"/></symbol>
+<symbol id="i-chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+<symbol id="i-back" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+<symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></symbol>
+<symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></symbol>
+<symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5zM14 3v5h5"/></symbol>
+<symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5 9-5zM3 13l9 5 9-5"/></symbol>
+<symbol id="i-card" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></symbol>
+<symbol id="i-package" viewBox="0 0 24 24"><path d="M12 3l8 4.500v9L12 21l-8-4.500v-9L12 3zM4 7.500l8 4.500 8-4.500M12 12v9"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+<symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8V4z"/></symbol>
+<symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2V5zM19 19v2H6"/></symbol>
+<symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1v-9z"/></symbol>
+<symbol id="i-wifi" viewBox="0 0 24 24"><path d="M2 9a15 15 0 0 1 20 0M5.500 12.500a10 10 0 0 1 13 0M9 16a5 5 0 0 1 6 0M12 20h.01"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.500h.01"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3l10 18H2L12 3zM12 10v4.500M12 17.500h.01"/></symbol>
+<symbol id="i-box" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 14h6"/></symbol>
+</defs>
+</svg>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top" data-home><span class="brand-mark"><svg class="i"><use href="#i-package"/></svg></span>غلاف</a>
+    <nav class="nav" aria-label="الأقسام">
+      <a href="#features">الميزات</a><a href="#how">كيف يعمل</a><a href="#lock">قفل الاشتراك</a><a href="#pricing">الأسعار</a><a href="#faq">الأسئلة</a>
+    </nav>
+    <div class="tools">
+      <div class="menu" id="acctMenu">
+        <button class="acct" id="acctBtn" aria-haspopup="true" aria-expanded="false" aria-controls="acctPanel">
+          <span class="avatar" id="acctAv"><svg class="i" style="width:16px;height:16px"><use href="#i-user"/></svg></span><span class="nm" id="acctNm">حسابي</span>
+        </button>
+        <div class="panel" id="acctPanel" hidden></div>
+      </div>
+      <div class="menu" id="moreMenu">
+        <button class="btn icon-btn" id="moreBtn" aria-label="المزيد" aria-haspopup="true" aria-expanded="false" aria-controls="morePanel"><svg class="i"><use href="#i-dots"/></svg></button>
+        <div class="panel" id="morePanel" hidden>
+          <div class="only-narrow">
+            <a class="mi" href="#features"><svg class="i"><use href="#i-layers"/></svg>الميزات</a>
+            <a class="mi" href="#how"><svg class="i"><use href="#i-zap"/></svg>كيف يعمل</a>
+            <a class="mi" href="#lock"><svg class="i"><use href="#i-lock"/></svg>قفل الاشتراك</a>
+            <a class="mi" href="#pricing"><svg class="i"><use href="#i-card"/></svg>الأسعار</a>
+            <div class="sep"></div>
+          </div>
+          <a class="mi" href="#faq"><svg class="i"><use href="#i-help"/></svg>مركز المساعدة</a>
+          <button class="mi" data-open="contact"><svg class="i"><use href="#i-mail"/></svg>تواصل معنا</button>
+          <button class="mi" id="themeBtn"><svg class="i"><use href="#i-moon"/></svg><span id="themeTxt">الوضع الداكن</span></button>
+          <div class="sep"></div>
+          <a class="mi" href="#privacy"><svg class="i"><use href="#i-shield"/></svg>سياسة الخصوصية</a>
+          <a class="mi" href="#terms"><svg class="i"><use href="#i-file"/></svg>الشروط والأحكام</a>
+          <div class="sep"></div>
+          <div class="mi" style="cursor:default;color:var(--muted);font-size:13px;min-height:34px"><svg class="i" style="width:16px;height:16px"><use href="#i-info"/></svg>غلاف · الإصدار التجريبي</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+<div id="viewHome">
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <h1>حوّل موقعك إلى تطبيق أندرويد جاهز للنشر</h1>
+      <p class="lead">ألصق رابط موقعك أو ارفع ملفاته. تحصل على ملف APK للتجربة وملف AAB لرفعه على Google Play، دون أن تفتح Android Studio.</p>
+      <div class="cta">
+        <button class="btn pri" data-auth="signup">ابدأ مجاناً</button>
+        <a class="btn" href="#how">شاهد كيف يعمل</a>
+      </div>
+      <ul class="checks">
+        <li><svg class="i"><use href="#i-check"/></svg>APK و AAB</li>
+        <li><svg class="i"><use href="#i-check"/></svg>مفتاح توقيع جاهز</li>
+        <li><svg class="i"><use href="#i-check"/></svg>بلا كتابة كود</li>
+      </ul>
+    </div>
+
+    <div class="bench" aria-label="معاينة حية للتطبيق">
+      <div class="bench-form">
+        <div class="seg" role="tablist" aria-label="مصدر الموقع">
+          <button role="tab" id="tabUrl" aria-selected="true"><svg class="i"><use href="#i-link"/></svg>رابط موقع</button>
+          <button role="tab" id="tabZip" aria-selected="false"><svg class="i"><use href="#i-upload"/></svg>رفع ملفات</button>
+        </div>
+        <div class="field" id="fUrl">
+          <label for="inUrl">رابط الموقع</label>
+          <input class="inp" id="inUrl" dir="ltr" inputmode="url" autocomplete="off" value="https://my-shop.com" placeholder="https://example.com">
+        </div>
+        <div class="field" id="fZip" hidden>
+          <span class="lbl">ملف الموقع (ZIP)</span>
+          <label class="drop" id="drop" for="inZip"><svg class="i" style="width:26px;height:26px"><use href="#i-file"/></svg><b id="zipName">اسحب الملف هنا أو اضغط للاختيار</b><span class="hint" id="zipHint">ملف ZIP يحتوي index.html في جذره</span></label>
+          <input class="sr" type="file" id="inZip" accept=".zip,application/zip">
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label for="inName">اسم التطبيق</label>
+            <input class="inp" id="inName" maxlength="30" value="متجري" autocomplete="off">
+          </div>
+          <div class="field">
+            <span class="lbl">الصيغة</span>
+            <div class="seg" id="fmt" role="group" aria-label="الصيغة">
+              <button type="button" aria-pressed="false" data-f="apk">APK</button>
+              <button type="button" aria-pressed="true" data-f="aab">AAB</button>
+            </div>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <span class="lbl" id="lblColor">اللون الأساسي</span>
+            <div class="swatches" id="swatches" role="radiogroup" aria-labelledby="lblColor"></div>
+          </div>
+          <div class="field">
+            <span class="lbl">الأيقونة</span>
+            <div class="iconpick">
+              <span class="pv" id="pvIcon">م</span>
+              <label class="btn sm" for="inIcon" style="cursor:pointer">رفع صورة</label>
+              <input class="sr" type="file" id="inIcon" accept="image/png,image/jpeg,image/webp">
+            </div>
+          </div>
+        </div>
+        <button class="btn pri" id="buildBtn" type="button"><svg class="i"><use href="#i-package"/></svg>ابنِ التطبيق</button>
+        <ul class="steps" id="steps" hidden>
+          <li><span class="dot"><svg class="i"><use href="#i-check"/></svg></span>في الطابور</li>
+          <li><span class="dot"><svg class="i"><use href="#i-check"/></svg></span>تجهيز قالب التطبيق</li>
+          <li><span class="dot"><svg class="i"><use href="#i-check"/></svg></span>البناء والتجميع</li>
+          <li><span class="dot"><svg class="i"><use href="#i-check"/></svg></span>التوقيع بالمفتاح</li>
+        </ul>
+        <div class="result" id="result" hidden>
+          <b>جاهز للتحميل</b>
+          <div class="f"><svg class="i"><use href="#i-package"/></svg><code id="resFile"></code><button class="btn sm pri" data-toast="هذه معاينة فقط. يبدأ التنزيل الفعلي بعد ربط عامل البناء.">تنزيل</button></div>
+          <div class="f"><svg class="i"><use href="#i-key"/></svg><code>upload-keystore.jks</code><button class="btn sm" data-toast="هذه معاينة فقط. المفتاح يُولَّد عند البناء الفعلي.">تنزيل المفتاح</button></div>
+          <span class="hint">معرّف الحزمة: <code id="resPkg"></code></span>
+        </div>
+      </div>
+      <div class="bench-stage">
+        <div class="phone"><div class="screen" id="scr1" data-view="site">
+          <div class="status"><span>9:41</span><span>5G</span></div>
+          <div class="view v-site">
+            <div class="appbar"><span class="ic" id="icSmall">م</span><span id="nmSmall">متجري</span></div>
+            <div class="site"><div class="host" id="hostTxt">my-shop.com</div><div class="ban"></div><div class="ln"></div><div class="ln s"></div><div class="cards"><i></i><i></i><i></i><i></i></div></div>
+          </div>
+          <div class="view v-splash"><div class="big" id="icBig">م</div><b id="nmBig">متجري</b><div class="bar"></div></div>
+        </div></div>
+        <div class="pill-row" role="group" aria-label="الشاشة المعروضة">
+          <button class="pill" type="button" data-scr1="splash" aria-pressed="false">شاشة البداية</button>
+          <button class="pill" type="button" data-scr1="site" aria-pressed="true">الموقع</button>
+        </div>
+        <p class="demo-note">محاكاة توضيحية للتطبيق الناتج</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW -->
+<section class="sec alt" id="how">
+  <div class="wrap">
+    <div class="sec-h"><h2>من الرابط إلى ملف جاهز في ثلاث خطوات</h2><p>لا تحتاج SDK ولا Gradle ولا جهاز بناء. نعمل ذلك على خوادمنا ونسلّمك الملفات.</p></div>
+    <div class="flow">
+      <div><div class="n" aria-hidden="true"></div><h3>أضف موقعك</h3><p>الصق الرابط، أو ارفع ملف ZIP ونستضيفه لك على خادمنا.</p></div>
+      <div><div class="n" aria-hidden="true"></div><h3>خصّص التطبيق</h3><p>اختر الاسم والأيقونة واللون وشاشة البداية، ثم الصيغة التي تريدها.</p></div>
+      <div><div class="n" aria-hidden="true"></div><h3>حمّل وانشر</h3><p>ينتهي البناء بإشعار، فتحمّل الملف ومفتاح التوقيع وترفعهما على Google Play.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="sec" id="features">
+  <div class="wrap">
+    <div class="sec-h"><h2>كل ما تحتاجه ليكون تطبيقك احترافياً</h2><p>ميزات التحويل والنشر والإدارة في مكان واحد.</p></div>
+    <div class="feat">
+      <article><span class="ico"><svg class="i"><use href="#i-globe"/></svg></span><div><h3>رابط أو ملفات</h3><p>حوّل موقعاً منشوراً بالرابط، أو ارفع ملفات HTML في ZIP ونستضيفها لك.</p></div></article>
+      <article><span class="ico"><svg class="i"><use href="#i-package"/></svg></span><div><h3>APK و AAB</h3><p>APK لتجربته على هاتفك مباشرة، وAAB لرفعه على Google Play.</p></div></article>
+      <article><span class="ico"><svg class="i"><use href="#i-key"/></svg></span><div><h3>مفتاح توقيع خاص بك</h3><p>نولّد مفتاح رفع لتطبيقك ونسلّمه لك. احتفظ بنسخة منه، فستحتاجه في كل تحديث.</p></div></article>
+      <article><span class="ico"><svg class="i"><use href="#i-palette"/></svg></span><div><h3>هوية التطبيق</h3><p>اسم وأيقونة ولون وشاشة بداية، بالشكل الذي يناسب علامتك.</p></div></article>
+      <article><span class="ico"><svg class="i"><use href="#i-wifi"/></svg></span><div><h3>شاشة انقطاع الإنترنت</h3><p>رسالة واضحة وزر لإعادة المحاولة بدل صفحة بيضاء.</p></div></article>
+      <article><span class="ico"><svg class="i"><use href="#i-refresh"/></svg></span><div><h3>تحديث بلا إعادة بناء<span class="chip">احترافية</span></h3><p>عدّل موقعك فيتحدّث التطبيق عند الجميع، دون رفع إصدار جديد.</p></div></article>
+      <article><span class="ico"><svg class="i"><use href="#i-bell"/></svg></span><div><h3>إشعارات Push<span class="chip">احترافية</span></h3><p>أرسل تنبيهات لمستخدمي تطبيقك من لوحة التحكم.</p></div></article>
+      <article><span class="ico"><svg class="i"><use href="#i-lock"/></svg></span><div><h3>قفل الاشتراك</h3><p>عند انتهاء الاشتراك يعرض التطبيق رسالة تواصل بدل المحتوى، حتى لو كان منشوراً على المتجر.</p></div></article>
+      <article><span class="ico"><svg class="i"><use href="#i-book"/></svg></span><div><h3>دليل النشر على Google Play</h3><p>خطوات مصورة من إنشاء حساب المطوّر حتى رفع الـ AAB وسياسة الخصوصية.</p></div></article>
+      <article><span class="ico"><svg class="i"><use href="#i-chart"/></svg></span><div><h3>لوحة تحكم</h3><p>تطبيقاتك وحالة البناء وسجل الأخطاء وتاريخ انتهاء الاشتراك في شاشة واحدة.</p></div></article>
+      <article><span class="ico"><svg class="i"><use href="#i-shield"/></svg></span><div><h3>بناء معزول وآمن</h3><p>كل عملية بناء تعمل في حاوية منفصلة، وتُحذف الملفات المؤقتة بعد مدة.</p></div></article>
+      <article><span class="ico"><svg class="i"><use href="#i-users"/></svg></span><div><h3>دعم مباشر</h3><p>تواصل معنا إن تعثّر بناء أو رُفض تطبيقك، ونساعدك في إصلاحه.</p></div></article>
+    </div>
+  </div>
+</section>
+
+<!-- LOCK -->
+<section class="sec alt" id="lock">
+  <div class="wrap lock">
+    <div>
+      <h2 style="font-size:clamp(26px,3.6vw,38px)">يتوقف التطبيق عند انتهاء الاشتراك</h2>
+      <p style="margin-top:12px;color:var(--muted);font-size:18px;max-width:34em">يسأل التطبيق خادمنا عند كل فتح هل الاشتراك فعّال. إن انتهى، يرى المستخدم رسالة تطلب التواصل مع المطوّر أو التجديد.</p>
+      <ul>
+        <li><svg class="i"><use href="#i-clock"/></svg><span>فترة سماح قصيرة لمن ينقطع إنترنته، ثم يُطلب منه الاتصال.</span></li>
+        <li><svg class="i"><use href="#i-refresh"/></svg><span>عند التجديد يعود التطبيق للعمل فوراً، دون رفع تحديث على المتجر.</span></li>
+        <li><svg class="i"><use href="#i-lock"/></svg><span>ملفات موقعك المرفوعة تُستضاف عندنا، فيقطع انتهاء الاشتراك الوصول إليها فعلاً.</span></li>
+      </ul>
+      <div class="sw-row">
+        <button class="switch" id="lockSw" role="switch" aria-checked="true" aria-labelledby="lockLbl"></button>
+        <span id="lockLbl" style="font-weight:600">الاشتراك فعّال</span>
+      </div>
+    </div>
+    <div class="lock-stage">
+      <div class="phone"><div class="screen" id="scr2" data-view="ok" style="--app:#0B7A63">
+        <div class="status"><span>9:41</span><span>5G</span></div>
+        <div class="view v-site">
+          <div class="appbar"><span class="ic">م</span><span>متجري</span></div>
+          <div class="site"><div class="host">my-shop.com</div><div class="ban"></div><div class="ln"></div><div class="ln s"></div><div class="cards"><i></i><i></i><i></i><i></i></div></div>
+        </div>
+        <div class="view v-expired">
+          <span class="badge"><svg class="i"><use href="#i-alert"/></svg></span>
+          <b>حدث خطأ</b>
+          <p>يرجى التواصل مع المطوّر أو تجديد الاشتراك.</p>
+          <span class="rb">إعادة المحاولة</span>
+          <code>SUB_EXPIRED</code>
+        </div>
+      </div></div>
+      <p class="demo-note">بدّل الحالة من المفتاح لترى الشاشتين</p>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="sec" id="pricing">
+  <div class="wrap">
+    <div class="sec-h"><h2>ابدأ مجاناً، وارتقِ عند الحاجة</h2><p>الأسعار بالدينار الجزائري. الدفع حالياً يدوي، ويُفعَّل اشتراكك بعد تأكيده.</p></div>
+    <div class="bill" role="group" aria-label="مدة الاشتراك">
+      <button class="pill" type="button" data-bill="m" aria-pressed="true">شهري</button>
+      <button class="pill" type="button" data-bill="y" aria-pressed="false">سنوي (شهران مجاناً)</button>
+    </div>
+    <div class="plans">
+      <div class="plan">
+        <h3>مجانية</h3>
+        <div class="pr">0 <small>دج</small></div>
+        <ul>
+          <li><svg class="i"><use href="#i-check"/></svg>تطبيق واحد</li>
+          <li><svg class="i"><use href="#i-check"/></svg>ملف APK فقط</li>
+          <li><svg class="i"><use href="#i-check"/></svg>3 عمليات بناء شهرياً</li>
+          <li><svg class="i"><use href="#i-check"/></svg>شاشة بداية تحمل اسم غلاف</li>
+        </ul>
+        <button class="btn" data-auth="signup">ابدأ مجاناً</button>
+      </div>
+      <div class="plan hl">
+        <h3>أساسية <span class="best">الأكثر طلباً</span></h3>
+        <div class="pr"><span data-price="1500">1,500</span> <small data-per>دج / شهر</small></div>
+        <ul>
+          <li><svg class="i"><use href="#i-check"/></svg>حتى 5 تطبيقات</li>
+          <li><svg class="i"><use href="#i-check"/></svg>APK و AAB</li>
+          <li><svg class="i"><use href="#i-check"/></svg>20 عملية بناء شهرياً</li>
+          <li><svg class="i"><use href="#i-check"/></svg>بدون علامة غلاف</li>
+          <li><svg class="i"><use href="#i-check"/></svg>دليل النشر على Google Play</li>
+        </ul>
+        <button class="btn pri" data-plan="الأساسية">اختر الأساسية</button>
+      </div>
+      <div class="plan">
+        <h3>احترافية</h3>
+        <div class="pr"><span data-price="3500">3,500</span> <small data-per>دج / شهر</small></div>
+        <ul>
+          <li><svg class="i"><use href="#i-check"/></svg>حتى 20 تطبيقاً</li>
+          <li><svg class="i"><use href="#i-check"/></svg>إشعارات Push</li>
+          <li><svg class="i"><use href="#i-check"/></svg>تحديث بلا إعادة بناء</li>
+          <li><svg class="i"><use href="#i-check"/></svg>أولوية في طابور البناء</li>
+          <li><svg class="i"><use href="#i-check"/></svg>دعم مباشر</li>
+        </ul>
+        <button class="btn" data-plan="الاحترافية">اختر الاحترافية</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="sec alt" id="faq">
+  <div class="wrap">
+    <div class="sec-h"><h2>أسئلة شائعة</h2></div>
+    <div class="faq">
+      <details><summary>هل يُقبل التطبيق على Google Play؟<svg class="i"><use href="#i-chev"/></svg></summary><p>تتشدد Google أحياناً مع التطبيقات التي هي مجرد غلاف لموقع. زيادة فرص القبول تكون بإضافة قيمة حقيقية: إشعارات، وعمل بدون إنترنت، وتجربة تختلف عن المتصفح. ولا يمكن لأحد ضمان القبول، فالقرار لدى Google.</p></details>
+      <details><summary>هل أحتاج حساب مطوّر على Google Play؟<svg class="i"><use href="#i-chev"/></svg></summary><p>نعم، وبحسابك أنت. رسمه 25 دولاراً مرة واحدة. للحسابات الشخصية الجديدة شرط اختبار مغلق مع عدد من المختبرين لفترة محددة قبل النشر العام. نشرح الخطوات في دليل النشر.</p></details>
+      <details><summary>ما الفرق بين APK و AAB؟<svg class="i"><use href="#i-chev"/></svg></summary><p>APK ملف تثبيت مباشر تجربه على هاتفك أو توزعه بنفسك. AAB هو الصيغة التي تطلبها Google Play عند رفع تطبيق جديد.</p></details>
+      <details><summary>ماذا يحدث لو انتهى اشتراكي؟<svg class="i"><use href="#i-chev"/></svg></summary><p>تتوقف تطبيقاتك عن عرض المحتوى وتظهر رسالة تطلب التواصل مع المطوّر أو تجديد الاشتراك. عند التجديد تعمل فوراً دون إعادة رفع. ملفاتك المرفوعة تُحفظ مدة بعد الانتهاء حتى تجدد.</p></details>
+      <details><summary>هل يمكنني تحديث موقعي بعد نشر التطبيق؟<svg class="i"><use href="#i-chev"/></svg></summary><p>إن كان التطبيق مرتبطاً برابط موقع، فأي تعديل على الموقع يظهر مباشرة. وفي خيار الملفات ترفع نسخة جديدة فتتحدّث دون إصدار جديد على المتجر. أما تغيير الاسم أو الأيقونة فيحتاج بناءً جديداً.</p></details>
+      <details><summary>أين يُحفظ مفتاح التوقيع؟<svg class="i"><use href="#i-chev"/></svg></summary><p>نولّده لك عند البناء ونسلّمك إياه مع كلمة المرور. احتفظ بنسخة آمنة، فخسارته تعني صعوبة تحديث تطبيقك لاحقاً. يمكنك أيضاً رفع مفتاحك الخاص.</p></details>
+      <details><summary>كيف أدفع الاشتراك؟<svg class="i"><use href="#i-chev"/></svg></summary><p>الدفع حالياً يدوي بعد التواصل معنا. نضيف الدفع الإلكتروني الآلي في مرحلة لاحقة، وسيُفعَّل اشتراكك عندها تلقائياً.</p></details>
+      <details><summary>ما المحتوى الممنوع؟<svg class="i"><use href="#i-chev"/></svg></summary><p>نمنع التطبيقات التي تنتحل جهات أخرى أو تخدع المستخدمين أو تجمع بياناتهم بطرق مضللة، وأي محتوى مخالف للقانون أو لسياسات Google Play. نوقف الحسابات المخالفة. التفاصيل في <a href="#terms">الشروط والأحكام</a>.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="sec" style="padding-bottom:0">
+  <div class="wrap">
+    <div class="cta-band">
+      <h2>جرّب تحويل موقعك الآن، ويصلك التطبيق خلال دقائق</h2>
+      <button class="btn" data-auth="signup">أنشئ حساباً مجانياً</button>
+    </div>
+  </div>
+</section>
+</div>
+
+<!-- PRIVACY -->
+<div id="viewPrivacy" hidden>
+<section class="legal"><div class="wrap">
+  <nav class="toc" aria-label="محتويات الصفحة"><b>المحتويات</b>
+    <a href="#privacy" data-jump="p1">1. مقدمة</a><a href="#privacy" data-jump="p2">2. البيانات التي نجمعها</a><a href="#privacy" data-jump="p3">3. كيف نستخدمها</a><a href="#privacy" data-jump="p4">4. التطبيقات الناتجة</a><a href="#privacy" data-jump="p5">5. مفاتيح التوقيع</a><a href="#privacy" data-jump="p6">6. مدة الاحتفاظ</a><a href="#privacy" data-jump="p7">7. المشاركة مع أطراف أخرى</a><a href="#privacy" data-jump="p8">8. الأمان</a><a href="#privacy" data-jump="p9">9. حقوقك</a><a href="#privacy" data-jump="p10">10. الأطفال</a><a href="#privacy" data-jump="p11">11. التغييرات والتواصل</a>
+  </nav>
+  <article class="doc">
+    <a class="back" href="#top" data-home><svg class="i"><use href="#i-back"/></svg>العودة للرئيسية</a>
+    <h1>سياسة الخصوصية</h1>
+    <p class="meta">آخر تحديث: 16 أكتوبر 2026</p>
+    <div class="box">نشرح هنا ما نجمعه من بيانات عند استخدامك غلاف، ولماذا، وكم نحتفظ به، وكيف تتحكم فيه.</div>
+    <h2 id="p1">1. مقدمة</h2>
+    <p>غلاف منصة تحوّل المواقع إلى تطبيقات أندرويد. تنطبق هذه السياسة على موقعنا ولوحة التحكم، وعلى الخدمات التي نقدمها لبناء التطبيقات والتحقق من الاشتراكات.</p>
+    <h2 id="p2">2. البيانات التي نجمعها</h2>
+    <ul>
+      <li><b>بيانات الحساب:</b> الاسم والبريد الإلكتروني وطريقة تسجيل الدخول (بريد أو Google).</li>
+      <li><b>ملفاتك:</b> ملف ZIP لموقعك والأيقونة وأي صورة ترفعها.</li>
+      <li><b>إعدادات التطبيق:</b> الاسم ومعرّف الحزمة والرابط والألوان والإصدار.</li>
+      <li><b>بيانات البناء:</b> حالة كل عملية بناء وسجلاتها، لعرض الأخطاء لك وإصلاحها.</li>
+      <li><b>بيانات الاشتراك:</b> الخطة وتواريخ البدء والانتهاء وسجل الدفعات اليدوية.</li>
+      <li><b>بيانات تقنية:</b> عنوان IP ونوع المتصفح، لأغراض الأمان ومنع إساءة الاستخدام.</li>
+    </ul>
+    <h2 id="p3">3. كيف نستخدمها</h2>
+    <ul>
+      <li>تشغيل الخدمة: بناء تطبيقك وتسليمه والتحقق من حالة اشتراكه.</li>
+      <li>التواصل معك: تأكيد الحساب وإشعارات انتهاء البناء وتنبيهات الاشتراك.</li>
+      <li>حماية المنصة: رصد الإساءة وتطبيق حدود الاستخدام.</li>
+      <li>تحسين الخدمة: فهم الأخطاء الشائعة وتطوير القوالب.</li>
+    </ul>
+    <p>لا نبيع بياناتك، ولا نستخدم ملفاتك لأي غرض خارج تقديم الخدمة لك.</p>
+    <h2 id="p4">4. التطبيقات الناتجة</h2>
+    <p>يتصل كل تطبيق ننتجه بخادمنا عند الفتح ليتحقق من حالة الاشتراك، ويرسل لذلك معرّف التطبيق فقط. لا نجمع بيانات زوار موقعك عبر هذا الاتصال.</p>
+    <p>أنت المسؤول عن سياسة الخصوصية الخاصة بتطبيقك وموقعك أمام مستخدميك وأمام Google Play، ونوفر لك قالباً يساعدك على كتابتها.</p>
+    <h2 id="p5">5. مفاتيح التوقيع</h2>
+    <p>نولّد مفتاح توقيع واحداً لكل تطبيق ونحفظه مع تطبيقك على خوادمنا، لنستعمل المفتاح نفسه في كل تحديث. يمكنك تنزيله مع كلمة مروره من لوحة التحكم في أي وقت، ونوصي بحفظ نسخة لديك. يُحذف المفتاح عند حذف التطبيق.</p>
+    <h2 id="p6">6. مدة الاحتفاظ</h2>
+    <ul>
+      <li>ملفات APK وAAB: 30 يوماً بعد البناء، ثم تُحذف تلقائياً. مفتاح التوقيع يبقى ما دام التطبيق قائماً.</li>
+      <li>ملفات الموقع المستضافة: ما دام الاشتراك فعّالاً، ثم 30 يوماً بعد انتهائه.</li>
+      <li>بيانات الحساب: ما دام الحساب قائماً، وتُحذف عند طلبك.</li>
+      <li>سجلات الأمان: مدة محدودة لأغراض الحماية.</li>
+    </ul>
+    <h2 id="p7">7. المشاركة مع أطراف أخرى</h2>
+    <p>نستعين بمزودي خدمات لتشغيل المنصة: مزود الخوادم والاستضافة، وخدمة إرسال البريد إن فُعّلت. يعالجون البيانات بالقدر اللازم لتقديم الخدمة فقط. قد نكشف بيانات عندما يوجبه القانون.</p>
+    <h2 id="p8">8. الأمان</h2>
+    <p>نستخدم اتصالاً مشفراً، وبناءً معزولاً لكل طلب، وحدوداً على حجم الملفات وعدد الطلبات، وفحصاً للملفات المرفوعة. لا يوجد نظام آمن بالكامل، ونبلغك إن حدث ما يمس بياناتك.</p>
+    <h2 id="p9">9. حقوقك</h2>
+    <p>يحق لك الاطلاع على بياناتك وتصحيحها وتنزيلها وحذف حسابك وملفاتك. اكتب إلينا وسنرد خلال مدة معقولة.</p>
+    <h2 id="p10">10. الأطفال</h2>
+    <p>الخدمة غير موجهة لمن هم دون 18 عاماً، ولا نجمع بياناتهم عن قصد.</p>
+    <h2 id="p11">11. التغييرات والتواصل</h2>
+    <p>قد نحدّث هذه السياسة، ونعلمك بالتغييرات الجوهرية عبر البريد أو لوحة التحكم. للاستفسار تواصل معنا من قائمة «تواصل معنا».</p>
+  </article>
+</div></section>
+</div>
+
+<!-- TERMS -->
+<div id="viewTerms" hidden>
+<section class="legal"><div class="wrap">
+  <nav class="toc" aria-label="محتويات الصفحة"><b>المحتويات</b>
+    <a href="#terms" data-jump="t1">1. القبول</a><a href="#terms" data-jump="t2">2. الخدمة</a><a href="#terms" data-jump="t3">3. الحساب</a><a href="#terms" data-jump="t4">4. الاستخدام المقبول</a><a href="#terms" data-jump="t5">5. المحتوى والملكية</a><a href="#terms" data-jump="t6">6. النشر على Google Play</a><a href="#terms" data-jump="t7">7. الاشتراكات</a><a href="#terms" data-jump="t8">8. الاسترداد</a><a href="#terms" data-jump="t9">9. الإيقاف</a><a href="#terms" data-jump="t10">10. حدود المسؤولية</a><a href="#terms" data-jump="t11">11. التعديل</a>
+  </nav>
+  <article class="doc">
+    <a class="back" href="#top" data-home><svg class="i"><use href="#i-back"/></svg>العودة للرئيسية</a>
+    <h1>الشروط والأحكام</h1>
+    <p class="meta">آخر تحديث: 16 أكتوبر 2026</p>
+    <div class="box">باستخدامك غلاف فإنك توافق على هذه الشروط. اقرأها قبل إنشاء حسابك.</div>
+    <h2 id="t1">1. القبول</h2>
+    <p>تسري هذه الشروط على كل من يزور المنصة أو ينشئ حساباً أو يبني تطبيقاً عبرها.</p>
+    <h2 id="t2">2. الخدمة</h2>
+    <p>نحوّل موقعاً (برابطه أو بملفاته) إلى تطبيق أندرويد يعرض هذا الموقع، ونسلّمه بصيغة APK أو AAB. التطبيق غلاف لموقعك وليس تحويلاً لكوده إلى كود أصلي.</p>
+    <h2 id="t3">3. الحساب</h2>
+    <p>أنت مسؤول عن صحة بياناتك وسرية كلمة مرورك وعن كل نشاط يتم عبر حسابك.</p>
+    <h2 id="t4">4. الاستخدام المقبول</h2>
+    <p>يُمنع استخدام المنصة في:</p>
+    <ul>
+      <li>انتحال هوية جهة أو شخص أو علامة تجارية، أو إنشاء تطبيقات تصيّد أو احتيال.</li>
+      <li>جمع بيانات المستخدمين بطرق مضللة أو دون موافقتهم.</li>
+      <li>نشر برمجيات خبيثة أو محتوى مخالف للقانون أو لحقوق الغير.</li>
+      <li>مخالفة سياسات Google Play أو أي متجر تنشر عليه.</li>
+      <li>تعطيل المنصة أو تجاوز حدود الاستخدام أو رفع ملفات ضارة.</li>
+    </ul>
+    <h2 id="t5">5. المحتوى والملكية</h2>
+    <p>تبقى ملكية موقعك وملفاتك وعلامتك لك، وتمنحنا ترخيصاً محدوداً لمعالجتها واستضافتها لأجل تقديم الخدمة فقط. وتتعهد بأنك تملك حق استخدامها.</p>
+    <h2 id="t6">6. النشر على Google Play</h2>
+    <p>تنشر تطبيقك بحساب المطوّر الخاص بك وتتحمل مسؤولية مطابقته لسياسات المتجر. لا نضمن قبول تطبيقك، ونوفر دليلاً ومساعدة فقط.</p>
+    <h2 id="t7">7. الاشتراكات</h2>
+    <ul>
+      <li>تحدد الخطة عدد التطبيقات وعمليات البناء والميزات المتاحة.</li>
+      <li>عند انتهاء الاشتراك تتوقف تطبيقاتك عن عرض المحتوى وتظهر رسالة تطلب التجديد أو التواصل مع المطوّر، حتى لو كانت منشورة.</li>
+      <li>تعود التطبيقات للعمل بعد التجديد دون حاجة لإعادة رفعها.</li>
+      <li>الدفع حالياً يدوي، ويُفعَّل الاشتراك بعد تأكيده.</li>
+    </ul>
+    <h2 id="t8">8. الاسترداد</h2>
+    <p>تُحدَّد شروط الاسترداد عند الاشتراك. وإن تعذّر علينا تقديم الخدمة بسبب خلل من جهتنا، فنعوّضك بتمديد الاشتراك أو بإعادة المبلغ حسب الحالة.</p>
+    <h2 id="t9">9. الإيقاف</h2>
+    <p>يحق لنا إيقاف حساب أو تطبيق يخالف هذه الشروط، فوراً إن كانت المخالفة جسيمة. ويمكنك حذف حسابك في أي وقت.</p>
+    <h2 id="t10">10. حدود المسؤولية</h2>
+    <p>نقدم الخدمة كما هي، ونبذل جهدنا لاستمرارها، لكن لا نضمن خلوها من الانقطاع أو الأخطاء. لا نتحمل خسائر غير مباشرة أو فقدان أرباح، ولا رفض أي متجر لتطبيقك.</p>
+    <h2 id="t11">11. التعديل</h2>
+    <p>قد نعدّل هذه الشروط، ونخطرك بالتغييرات الجوهرية. استمرارك بالاستخدام بعد التعديل يعني موافقتك.</p>
+  </article>
+</div></section>
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="fgrid">
+      <div>
+        <a class="brand" href="#top" data-home><span class="brand-mark"><svg class="i"><use href="#i-package"/></svg></span>غلاف</a>
+        <p>حوّل موقعك إلى تطبيق أندرويد بملف APK أو AAB جاهز للنشر.</p>
+      </div>
+      <div><h4>المنتج</h4><a href="#features">الميزات</a><a href="#how">كيف يعمل</a><a href="#pricing">الأسعار</a></div>
+      <div><h4>الدعم</h4><a href="#faq">الأسئلة الشائعة</a><a href="#contact" data-open="contact">تواصل معنا</a></div>
+      <div><h4>قانوني</h4><a href="#privacy">سياسة الخصوصية</a><a href="#terms">الشروط والأحكام</a></div>
+    </div>
+    <div class="copy"><span>© 2026 غلاف. جميع الحقوق محفوظة.</span><span>Google Play وAndroid علامتان تجاريتان لشركة Google LLC.</span></div>
+  </div>
+</footer>
+
+<!-- AUTH MODAL -->
+<div class="modal" id="authModal" hidden>
+  <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="authTtl">
+    <button class="x" data-close aria-label="إغلاق"><svg class="i"><use href="#i-x"/></svg></button>
+    <h2 id="authTtl">إنشاء حساب</h2>
+    <p class="sub" id="authSub">ابدأ بالخطة المجانية، ولا نطلب بطاقة دفع.</p>
+    <div class="seg" role="tablist" aria-label="نوع النموذج">
+      <button role="tab" id="aSignup" aria-selected="true">حساب جديد</button>
+      <button role="tab" id="aLogin" aria-selected="false">تسجيل الدخول</button>
+    </div>
+    <form id="authForm" novalidate>
+      <div class="field" id="nameRow"><label for="auName">الاسم</label><input class="inp" id="auName" autocomplete="name"></div>
+      <div class="field"><label for="auMail">البريد الإلكتروني</label><input class="inp" id="auMail" type="email" dir="ltr" autocomplete="email" placeholder="name@example.com"></div>
+      <div class="field"><label for="auPass">كلمة المرور</label><input class="inp" id="auPass" type="password" dir="ltr" autocomplete="new-password"><span class="hint">8 أحرف على الأقل</span></div>
+      <div class="err" id="authErr" role="alert"></div>
+      <button class="btn pri" type="submit" id="authGo">إنشاء الحساب</button>
+      <p class="hint" style="text-align:center">بالمتابعة توافق على <a href="#terms">الشروط</a> و<a href="#privacy">سياسة الخصوصية</a>.</p>
+    </form>
+  </div>
+</div>
+
+<!-- CONTACT MODAL -->
+<div class="modal" id="contactModal" hidden>
+  <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="ctTtl">
+    <button class="x" data-close aria-label="إغلاق"><svg class="i"><use href="#i-x"/></svg></button>
+    <h2 id="ctTtl">تواصل معنا</h2>
+    <p class="sub" id="ctSub">اكتب لنا عن مشكلة في البناء أو عن الاشتراك، وسنرد عليك.</p>
+    <div class="mail-line"><code id="mailTxt">support@your-domain.com</code><button class="btn sm" id="copyMail"><svg class="i"><use href="#i-copy"/></svg>نسخ</button></div>
+    <p class="hint" id="payTxt">اذكر في رسالتك بريد حسابك واسم الخطة.</p>
+  </div>
+</div>
+
+<div class="toast" id="toast" aria-live="polite"><span id="toastTxt"></span></div>
+</div>
+
+<script>
+(function(){
+  document.documentElement.dir="rtl"; document.documentElement.lang="ar";
+  var $=function(s,r){return (r||document).querySelector(s)}, $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+  var store={get:function(k){try{return localStorage.getItem(k)}catch(e){return null}},set:function(k,v){try{localStorage.setItem(k,v)}catch(e){}},del:function(k){try{localStorage.removeItem(k)}catch(e){}}};
+
+  /* toast */
+  var tt; function toast(m){var t=$("#toast");$("#toastTxt").textContent=m;t.classList.add("show");clearTimeout(tt);tt=setTimeout(function(){t.classList.remove("show")},3200)}
+  document.addEventListener("click",function(e){var b=e.target.closest("[data-toast]");if(b){toast(b.getAttribute("data-toast"))}});
+
+  /* theme */
+  function applyTheme(t){
+    if(t==="dark"||t==="light"){document.documentElement.setAttribute("data-theme",t)}else{document.documentElement.removeAttribute("data-theme")}
+    var dark = t==="dark" || (t!=="light" && window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches);
+    $("#themeTxt").textContent = dark ? "الوضع الفاتح" : "الوضع الداكن";
+    $("#themeBtn use").setAttribute("href", dark ? "#i-sun" : "#i-moon");
+  }
+  applyTheme(store.get("ghilaf-theme"));
+  $("#themeBtn").addEventListener("click",function(){
+    var cur=document.documentElement.getAttribute("data-theme");
+    var dark = cur==="dark" || (!cur && matchMedia("(prefers-color-scheme: dark)").matches);
+    var next = dark ? "light":"dark"; store.set("ghilaf-theme",next); applyTheme(next); closeMenus();
+  });
+
+  /* menus */
+  var menus=[["#acctBtn","#acctPanel"],["#moreBtn","#morePanel"]];
+  function closeMenus(except){menus.forEach(function(m){if(m[1]!==except){$(m[1]).hidden=true;$(m[0]).setAttribute("aria-expanded","false")}})}
+  menus.forEach(function(m){
+    $(m[0]).addEventListener("click",function(e){
+      e.stopPropagation(); var p=$(m[1]); var open=p.hidden; closeMenus(m[1]); p.hidden=!open; this.setAttribute("aria-expanded",String(open));
+      if(open){var f=p.querySelector("a,button");if(f)f.focus()}
+    });
+    $(m[1]).addEventListener("click",function(e){if(e.target.closest("a,button")){closeMenus()}});
+  });
+  document.addEventListener("click",function(e){if(!e.target.closest(".menu"))closeMenus()});
+  document.addEventListener("keydown",function(e){
+    if(e.key==="Escape"){closeMenus();closeModal()}
+  });
+
+  /* account (real session) */
+  var user=null;
+  function postJson(url,body){return fetch(url,{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify(body||{})}).then(function(r){return r.json().catch(function(){return {}}).then(function(j){return {ok:r.ok,j:j}})})}
+  function renderAcct(){
+    var p=$("#acctPanel"),av=$("#acctAv"),nm=$("#acctNm");
+    if(user){
+      av.textContent=(user.name||user.email||"م").trim().charAt(0).toUpperCase(); nm.textContent=user.name||"حسابي";
+      p.innerHTML='<div class="who"><b></b><span></span></div>'+
+      '<a class="mi" href="/dashboard.html#apps"><svg class="i"><use href="#i-home"/></svg>لوحة التحكم</a>'+
+      '<a class="mi" href="/dashboard.html#new"><svg class="i"><use href="#i-phone"/></svg>تطبيق جديد</a>'+
+      '<a class="mi" href="/dashboard.html#plan"><svg class="i"><use href="#i-card"/></svg>الاشتراك<span class="tag"></span></a>'+
+      (user.role==="admin"?'<a class="mi" href="/admin.html"><svg class="i"><use href="#i-settings"/></svg>الإدارة</a>':'')+
+      '<div class="sep"></div><button class="mi danger" id="logout"><svg class="i"><use href="#i-logout"/></svg>تسجيل الخروج</button>';
+      $("b",p).textContent=user.name||"حسابي"; $(".who span",p).textContent=user.email;
+      $(".tag",p).textContent=user.effectivePlan==="expired"?"منتهية":user.planLabel;
+      $("#logout").addEventListener("click",function(){postJson("/api/auth/logout").then(function(){user=null;renderAcct();toast("تم تسجيل الخروج")})});
+    }else{
+      av.innerHTML='<svg class="i" style="width:16px;height:16px"><use href="#i-user"/></svg>'; nm.textContent="حسابي";
+      p.innerHTML='<button class="mi" data-auth="login"><svg class="i"><use href="#i-user"/></svg>تسجيل الدخول</button>'+
+      '<button class="mi" data-auth="signup"><svg class="i"><use href="#i-zap"/></svg>إنشاء حساب مجاني</button>';
+    }
+  }
+  renderAcct();
+  fetch("/api/auth/me",{credentials:"same-origin"}).then(function(r){return r.json()}).then(function(j){user=j.user||null;renderAcct()}).catch(function(){});
+  fetch("/api/config").then(function(r){return r.json()}).then(function(c){
+    if(c.supportEmail)$("#mailTxt").textContent=c.supportEmail;
+    if(c.payInstructions)$("#payTxt").textContent=c.payInstructions;
+  }).catch(function(){});
+
+  /* modals */
+  var lastFocus=null;
+  function openModal(id){lastFocus=document.activeElement;var m=$("#"+id);m.hidden=false;var f=m.querySelector("input:not([hidden]),button.btn");if(f)setTimeout(function(){f.focus()},30)}
+  function closeModal(){$$(".modal").forEach(function(m){m.hidden=true});if(lastFocus&&lastFocus.focus){try{lastFocus.focus()}catch(e){}}}
+  $$(".modal").forEach(function(m){m.addEventListener("mousedown",function(e){if(e.target===m)closeModal()})});
+  document.addEventListener("click",function(e){
+    var c=e.target.closest("[data-close]");if(c){closeModal();return}
+    var o=e.target.closest("[data-open]");if(o){e.preventDefault();closeMenus();openModal(o.getAttribute("data-open")==="contact"?"contactModal":"authModal");return}
+    var a=e.target.closest("[data-auth]");if(a){closeMenus();setAuth(a.getAttribute("data-auth"));openModal("authModal")}
+  });
+  var mode="signup";
+  function setAuth(m){
+    mode=m; var s=m==="signup";
+    $("#aSignup").setAttribute("aria-selected",s);$("#aLogin").setAttribute("aria-selected",!s);
+    $("#authTtl").textContent=s?"إنشاء حساب":"تسجيل الدخول";
+    $("#authSub").textContent=s?"ابدأ بالخطة المجانية، ولا نطلب بطاقة دفع.":"أهلاً بعودتك. أدخل بياناتك للمتابعة.";
+    $("#nameRow").hidden=!s; $("#authGo").textContent=s?"إنشاء الحساب":"تسجيل الدخول";
+    $("#auPass").setAttribute("autocomplete",s?"new-password":"current-password"); $("#authErr").textContent="";
+  }
+  $("#aSignup").addEventListener("click",function(){setAuth("signup")});
+  $("#aLogin").addEventListener("click",function(){setAuth("login")});
+  $("#authForm").addEventListener("submit",function(e){
+    e.preventDefault(); var n=$("#auName").value.trim(),m=$("#auMail").value.trim(),p=$("#auPass").value,err=$("#authErr");
+    if(mode==="signup"&&!n){err.textContent="أدخل اسمك.";$("#auName").focus();return}
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(m)){err.textContent="أدخل بريداً إلكترونياً صحيحاً.";$("#auMail").focus();return}
+    if(p.length<8){err.textContent="كلمة المرور أقل من 8 أحرف. أضف أحرفاً حتى تصل إلى 8.";$("#auPass").focus();return}
+    var btn=$("#authGo"),form=this; btn.disabled=true; err.textContent="";
+    postJson("/api/auth/"+(mode==="signup"?"register":"login"),{name:n,email:m,password:p}).then(function(x){
+      btn.disabled=false;
+      if(!x.ok){err.textContent=x.j.error||"حدث خطأ. حاول مرة أخرى.";return}
+      user=x.j.user;renderAcct();closeModal();form.reset();
+      var draft=false;try{draft=!!sessionStorage.getItem("ghilaf-draft")}catch(e2){}
+      location.href="/dashboard.html#"+(draft?"new":"apps");
+    },function(){btn.disabled=false;err.textContent="تعذّر الاتصال بالخادم. حاول مرة أخرى."});
+  });
+  $("#copyMail").addEventListener("click",function(){
+    var t=$("#mailTxt").textContent;
+    function sel(){var r=document.createRange();r.selectNodeContents($("#mailTxt"));var s=getSelection();s.removeAllRanges();s.addRange(r);toast("حدّد البريد، اضغط نسخ من لوحة المفاتيح")}
+    try{navigator.clipboard.writeText(t).then(function(){toast("تم نسخ البريد")},sel)}catch(e){sel()}
+  });
+
+  /* router */
+  var views={privacy:$("#viewPrivacy"),terms:$("#viewTerms")},home=$("#viewHome");
+  function route(){
+    var h=(location.hash||"").slice(1);
+    if(h==="login"||h==="signup"){history.replaceState(null,"",location.pathname);setAuth(h);openModal("authModal");return}
+    if(views[h]){home.hidden=true;Object.keys(views).forEach(function(k){views[k].hidden=(k!==h)});window.scrollTo(0,0);document.title=(h==="privacy"?"سياسة الخصوصية":"الشروط والأحكام")+" | غلاف";return}
+    Object.keys(views).forEach(function(k){views[k].hidden=true});home.hidden=false;document.title="غلاف";
+    var el=h&&h!=="top"&&h!=="contact"?document.getElementById(h):null;
+    if(el){setTimeout(function(){el.scrollIntoView({behavior:"smooth",block:"start"})},0)}else if(h==="top"||!h){window.scrollTo(0,0)}
+  }
+  window.addEventListener("hashchange",route); route();
+  document.addEventListener("click",function(e){
+    var j=e.target.closest("[data-jump]");if(j){e.preventDefault();var t=document.getElementById(j.getAttribute("data-jump"));if(t)t.scrollIntoView({behavior:"smooth",block:"start"});return}
+    var h=e.target.closest("[data-home]");if(h&&(location.hash===""||location.hash==="#top")){e.preventDefault();window.scrollTo({top:0,behavior:"smooth"})}
+  });
+
+  /* hero builder */
+  var COLORS=["#0B7A63","#2457D6","#C2410C","#7C3AED","#BE185D","#111827"];
+  var S={mode:"url",fmt:"aab",color:COLORS[0],icon:null,building:false};
+  function fgOn(hex){var r=parseInt(hex.substr(1,2),16),g=parseInt(hex.substr(3,2),16),b=parseInt(hex.substr(5,2),16);var l=(0.299*r+0.587*g+0.114*b)/255;return l>0.62?"#111":"#fff"}
+  var sw=$("#swatches");
+  COLORS.forEach(function(c,i){var b=document.createElement("button");b.type="button";b.className="sw";b.style.background=c;b.setAttribute("role","radio");b.setAttribute("aria-label","اللون "+(i+1));b.setAttribute("aria-checked",i===0);b.dataset.c=c;sw.appendChild(b)});
+  var cu=document.createElement("label");cu.className="sw";cu.style.background="conic-gradient(red,yellow,lime,cyan,blue,magenta,red)";cu.setAttribute("aria-label","لون مخصص");cu.innerHTML='<input type="color" value="#0B7A63" aria-label="لون مخصص">';sw.appendChild(cu);
+  function setColor(c){S.color=c;$$("#swatches .sw[data-c]").forEach(function(b){b.setAttribute("aria-checked",b.dataset.c.toLowerCase()===c.toLowerCase())});paint()}
+  sw.addEventListener("click",function(e){var b=e.target.closest(".sw[data-c]");if(b)setColor(b.dataset.c)});
+  $("input",cu).addEventListener("input",function(){setColor(this.value)});
+  function host(){var v=$("#inUrl").value.trim();if(S.mode==="zip")return"site.ghilaf.app";if(!v)return"example.com";try{return new URL(/^https?:\/\//i.test(v)?v:"https://"+v).hostname.replace(/^www\./,"")}catch(e){return v}}
+  function setIconEl(el,txt){if(S.icon){el.style.backgroundImage="url("+S.icon+")";el.textContent=""}else{el.style.backgroundImage="none";el.textContent=txt}}
+  function paint(){
+    var name=$("#inName").value.trim()||"تطبيقي",l=name.charAt(0);
+    var scr=$("#scr1");scr.style.setProperty("--app",S.color);scr.style.setProperty("--appfg",fgOn(S.color));
+    $("#nmSmall").textContent=name;$("#nmBig").textContent=name;$("#hostTxt").textContent=host();
+    setIconEl($("#icSmall"),l);setIconEl($("#icBig"),l);
+    var pv=$("#pvIcon");pv.style.setProperty("--app",S.color);setIconEl(pv,l);
+    if(!S.icon){pv.style.backgroundImage="none";pv.style.background=S.color}else{pv.style.background=""}
+    pv.style.color=fgOn(S.color);
+    resetBuild();
+  }
+  function resetBuild(){}
+  $("#inUrl").addEventListener("input",paint);$("#inName").addEventListener("input",paint);
+  function setMode(m){
+    S.mode=m;$("#tabUrl").setAttribute("aria-selected",m==="url");$("#tabZip").setAttribute("aria-selected",m==="zip");
+    $("#fUrl").hidden=m!=="url";$("#fZip").hidden=m!=="zip";paint();
+  }
+  $("#tabUrl").addEventListener("click",function(){setMode("url")});$("#tabZip").addEventListener("click",function(){setMode("zip")});
+  $("#fmt").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;S.fmt=b.dataset.f;$$("#fmt button").forEach(function(x){x.setAttribute("aria-pressed",x===b)});resetBuild()});
+  function zipPick(f){
+    var h=$("#zipHint");
+    if(!f)return;
+    if(!/\.zip$/i.test(f.name)){h.textContent="الملف ليس بصيغة ZIP. اختر ملفاً ينتهي بـ ‎.zip";h.style.color="var(--bad)";return}
+    if(f.size>50*1024*1024){h.textContent="الحجم أكبر من 50 ميغابايت. قلّل حجم الملفات وأعد المحاولة.";h.style.color="var(--bad)";return}
+    $("#zipName").textContent=f.name;h.style.color="";h.textContent=(f.size/1048576).toFixed(2)+" ميغابايت";paint();
+  }
+  $("#inZip").addEventListener("change",function(){zipPick(this.files[0])});
+  var dr=$("#drop");["dragenter","dragover"].forEach(function(ev){dr.addEventListener(ev,function(e){e.preventDefault();dr.classList.add("over")})});
+  ["dragleave","drop"].forEach(function(ev){dr.addEventListener(ev,function(e){e.preventDefault();dr.classList.remove("over")})});
+  dr.addEventListener("drop",function(e){zipPick(e.dataTransfer.files[0])});
+  $("#inIcon").addEventListener("change",function(){
+    var f=this.files[0];if(!f)return;
+    if(f.size>2*1024*1024){toast("الصورة أكبر من 2 ميغابايت");return}
+    var r=new FileReader();r.onload=function(){S.icon=r.result;paint()};r.readAsDataURL(f);
+  });
+  $$("[data-scr1]").forEach(function(b){b.addEventListener("click",function(){$("#scr1").dataset.view=b.dataset.scr1;$$("[data-scr1]").forEach(function(x){x.setAttribute("aria-pressed",x===b)})})});
+  $("#buildBtn").addEventListener("click",function(){
+    try{sessionStorage.setItem("ghilaf-draft",JSON.stringify({mode:S.mode,url:$("#inUrl").value.trim(),name:$("#inName").value.trim(),color:S.color}))}catch(e){}
+    if(user){location.href="/dashboard.html#new"}else{setAuth("signup");openModal("authModal")}
+  });
+  $$("[data-plan]").forEach(function(b){b.addEventListener("click",function(){$("#ctTtl").textContent="اشتراك الخطة "+b.dataset.plan;$("#ctSub").textContent="أرسل لنا بريد حسابك واسم الخطة، وسنرسل لك طريقة الدفع ونفعّل اشتراكك.";openModal("contactModal")})});
+  paint();
+
+  /* lock demo */
+  var sw2=$("#lockSw");
+  sw2.addEventListener("click",function(){
+    var on=this.getAttribute("aria-checked")!=="true";this.setAttribute("aria-checked",on);
+    $("#lockLbl").textContent=on?"الاشتراك فعّال":"الاشتراك منتهٍ";$("#scr2").dataset.view=on?"ok":"expired";
+  });
+
+  /* pricing toggle */
+  $$("[data-bill]").forEach(function(b){b.addEventListener("click",function(){
+    var y=b.dataset.bill==="y";$$("[data-bill]").forEach(function(x){x.setAttribute("aria-pressed",x===b)});
+    $$("[data-price]").forEach(function(p){var v=+p.dataset.price;p.textContent=(y?v*10:v).toLocaleString("en-US")});
+    $$("[data-per]").forEach(function(p){p.textContent=y?"دج / سنة":"دج / شهر"});
+  })});
+})();
+</script>

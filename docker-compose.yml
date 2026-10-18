@@ -1,0 +1,17 @@
+services:
+  ghilaf:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # داخل الحاوية يكون الـ SDK هنا دائماً (يتجاوز القيمة الموجودة في .env)
+      ANDROID_HOME: /opt/android-sdk
+      BUILD_DRY_RUN: "0"
+    ports:
+      - "3000:3000"   # الموقع ولوحات التحكم
+      - "3001:3001"   # استضافة ملفات المواقع المرفوعة (ZIP)
+    volumes:
+      - ./data:/app/data   # قاعدة البيانات والملفات ومفاتيح التوقيع. خذ منه نسخة احتياطية دورياً.
+      - gradle-cache:/home/ghilaf/.gradle   # يسرّع البناءات التالية
+volumes:
+  gradle-cache:

@@ -1,0 +1,21 @@
+{
+  "name": "ghilaf",
+  "version": "0.1.0",
+  "private": true,
+  "description": "غلاف: منصة تحويل المواقع إلى تطبيقات أندرويد (APK / AAB) مع قفل الاشتراك",
+  "scripts": {
+    "start": "node server/index.js",
+    "setup": "node scripts/setup-gradle.js",
+    "check": "node scripts/check-env.js",
+    "make-admin": "node scripts/make-admin.js"
+  },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "adm-zip": "^0.5.16",
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": ">=11.5.0",
+    "express": "^4.21.1",
+    "multer": "^2.0.0",
+    "sharp": ">=0.33.5"
+  }
+}

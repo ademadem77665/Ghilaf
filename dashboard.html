@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>لوحة التحكم | غلاف</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Readex+Pro:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
+</head>
+<body>
+<header class="top" id="hdr"></header>
+<main class="wrap" id="view"><p class="muted">جارٍ التحميل...</p></main>
+<script src="/assets/app.js"></script>
+<script>
+(function () {
+  var view = document.getElementById('view');
+  var me = null, cfg = null, pollT = null, openDetails = {};
+  var COLORS = ['#0B7A63', '#2457D6', '#C2410C', '#7C3AED', '#BE185D', '#111827'];
+  var esc = G.esc;
+
+  function fgOn(hex) {
+    var r = parseInt(hex.substr(1, 2), 16), g = parseInt(hex.substr(3, 2), 16), b = parseInt(hex.substr(5, 2), 16);
+    return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.62 ? '#111' : '#fff';
+  }
+  function mark(a, size) {
+    return '<span class="appmark" style="background:' + esc(a.color) + ';color:' + fgOn(a.color) + (size ? ';width:' + size + 'px;height:' + size + 'px' : '') + '">' + esc(String(a.name).charAt(0)) + '</span>';
+  }
+  function meter(used, max) {
+    var pct = max ? Math.min(100, used / max * 100) : 100;
+    return '<div class="meter' + (used >= max ? ' full' : '') + '"><i style="width:' + pct + '%"></i></div>';
+  }
+  function err(e) { G.toast(e.message || 'حدث خطأ.'); }
+  function planName() { return me.effectivePlan === 'expired' ? 'منتهية' : me.limits.label; }
+  function refreshMe() { return G.me().then(function (u) { me = u || me; }); }
+
+  // ---------- تطبيقاتي ----------
+  function renderApps() {
+    G.header('apps', me);
+    return G.api('/apps').then(function (r) {
+      return refreshMe().then(function () {
+        var lim = me.limits, u = me.usage, full = u.apps >= lim.apps;
+        var h = '<div class="page-h"><h1>تطبيقاتي</h1>' +
+          (full ? '<a class="btn" href="#plan">الترقية لإضافة تطبيقات</a>' : '<a class="btn pri" href="#new">تطبيق جديد</a>') + '</div>';
+        if (me.role !== 'admin') {
+          if (me.effectivePlan === 'expired') {
+            h += '<div class="alert bad" style="margin-bottom:16px">اشتراكك منتهٍ. تظهر لمستخدمي تطبيقاتك رسالة «حدث خطأ، يرجى التواصل مع المطوّر أو تجديد الاشتراك». <a href="#plan">جدّد الاشتراك</a></div>';
+          } else if (me.plan !== 'free' && me.planExpires && me.planExpires - Date.now() < 7 * 86400000) {
+            h += '<div class="alert warn" style="margin-bottom:16px">ينتهي اشتراكك في ' + G.date(me.planExpires) + '. جدّده قبل ذلك حتى لا تتوقف تطبيقاتك. <a href="#plan">التفاصيل</a></div>';
+          }
+        }
+        h += '<div class="cols" style="margin-bottom:20px"><div class="card"><div class="row between"><span class="lbl">التطبيقات</span><span class="muted sm-t">' + u.apps + ' / ' + lim.apps + '</span></div>' + meter(u.apps, lim.apps) + '</div>' +
+          '<div class="card"><div class="row between"><span class="lbl">عمليات البناء هذا الشهر</span><span class="muted sm-t">' + u.builds + ' / ' + lim.builds + '</span></div>' + meter(u.builds, lim.builds) + '</div></div>';
+        if (!r.apps.length) {
+          h += '<div class="card empty"><h3>لا توجد تطبيقات بعد</h3><p>أضف رابط موقعك أو ملفاته، واحصل على ملف APK أو AAB.</p><p style="margin-top:16px"><a class="btn pri" href="#new">أنشئ أول تطبيق</a></p></div>';
+        } else {
+          h += '<div class="grid">' + r.apps.map(function (a) {
+            var lb = a.lastBuild ? G.pill(a.lastBuild.status) : '<span class="pill">لم يُبنَ بعد</span>';
+            return '<a class="card" href="#app/' + a.id + '" style="text-decoration:none;color:inherit;display:block"><div class="row" style="flex-wrap:nowrap">' + mark(a) +
+              '<div style="min-width:0"><h3>' + esc(a.name) + '</h3><div class="mono muted">' + esc(a.package) + '</div></div></div>' +
+              '<div class="row" style="margin-top:14px"><span class="pill">' + (a.source === 'zip' ? 'ملفات' : 'رابط') + '</span>' +
+              (a.status === 'active' ? '' : '<span class="pill bad">موقوف</span>') + lb + '</div></a>';
+          }).join('') + '</div>';
+        }
+        view.innerHTML = h;
+      });
+    });
+  }
+
+  // ---------- تطبيق جديد ----------
+  function renderNew() {
+    G.header('new', me);
+    var draft = {};
+    try { draft = JSON.parse(sessionStorage.getItem('ghilaf-draft') || '{}'); sessionStorage.removeItem('ghilaf-draft'); } catch (e) { draft = {}; }
+    var color = /^#[0-9a-fA-F]{6}$/.test(draft.color || '') ? draft.color : COLORS[0];
+    var mode = draft.mode === 'zip' ? 'zip' : 'url';
+    var lim = me.limits;
+    if (me.usage.apps >= lim.apps) {
+      view.innerHTML = '<div class="card empty"><h3>' + (me.effectivePlan === 'expired' ? 'اشتراكك منتهٍ' : 'وصلت إلى حد خطتك') + '</h3><p>' +
+        (me.effectivePlan === 'expired' ? 'جدّد اشتراكك لإنشاء تطبيقات جديدة.' : 'لديك ' + me.usage.apps + ' من ' + lim.apps + ' تطبيقات.') + '</p><p style="margin-top:16px"><a class="btn pri" href="#plan">الاشتراك</a></p></div>';
+      return Promise.resolve();
+    }
+    view.innerHTML = '<div class="page-h"><h1>تطبيق جديد</h1></div><form class="card form" id="f" novalidate>' +
+      '<div class="field"><span class="lbl">مصدر الموقع</span><div class="seg" id="src"><button type="button" data-m="url" aria-pressed="false">رابط موقع</button><button type="button" data-m="zip" aria-pressed="false">رفع ملفات (ZIP)</button></div></div>' +
+      '<div class="field" id="fUrl"><label for="url">رابط الموقع</label><input class="inp ltr" id="url" inputmode="url" placeholder="https://example.com" autocomplete="off"></div>' +
+      '<div class="field" id="fZip"><label for="zip">ملف الموقع (ZIP)</label><input class="inp" id="zip" type="file" accept=".zip,application/zip"><span class="hint">يجب أن يحتوي index.html في المستوى الأول. الحد الأقصى 50 ميغابايت. نستضيف ملفاتك، فيقطع انتهاء الاشتراك الوصول إليها.</span></div>' +
+      '<div class="cols"><div class="field"><label for="name">اسم التطبيق</label><input class="inp" id="name" maxlength="30" autocomplete="off"><span class="hint">حتى 30 حرفاً.</span></div>' +
+      '<div class="field"><label for="pkg">معرّف الحزمة (اختياري)</label><input class="inp ltr" id="pkg" placeholder="com.mycompany.myapp" autocomplete="off"><span class="hint">يُولَّد تلقائياً إن تركته فارغاً. لا يمكن تغييره بعد النشر على Google Play.</span></div></div>' +
+      '<div class="cols"><div class="field"><span class="lbl" id="lc">اللون الأساسي</span><div class="swatches" id="sw" role="radiogroup" aria-labelledby="lc"></div></div>' +
+      '<div class="field"><label for="icon">الأيقونة (PNG أو JPG، مربعة وبحجم 512 فأكثر)</label><input class="inp" id="icon" type="file" accept="image/png,image/jpeg,image/webp"></div></div>' +
+      '<div class="field"><label for="contact">نص التواصل في شاشة انتهاء الاشتراك (اختياري)</label><input class="inp" id="contact" maxlength="200" placeholder="مثال: واتساب 0550 00 00 00"><span class="hint">يظهر لمستخدمي تطبيقك إن انتهى الاشتراك.</span></div>' +
+      '<div class="row"><button class="btn pri" id="go" type="submit">إنشاء التطبيق</button><a class="btn" href="#apps">إلغاء</a></div></form>';
+
+    var f = document.getElementById('f');
+    f.name.value = draft.name || '';
+    f.url.value = draft.url || '';
+    function setMode(m) {
+      mode = m;
+      [].forEach.call(f.querySelectorAll('#src button'), function (b) { b.setAttribute('aria-pressed', b.dataset.m === m); });
+      document.getElementById('fUrl').hidden = m !== 'url';
+      document.getElementById('fZip').hidden = m !== 'zip';
+    }
+    function setColor(c) {
+      color = c;
+      [].forEach.call(f.querySelectorAll('.sw[data-c]'), function (b) { b.setAttribute('aria-checked', b.dataset.c.toLowerCase() === c.toLowerCase()); });
+    }
+    var sw = document.getElementById('sw');
+    sw.innerHTML = COLORS.map(function (c, i) { return '<button type="button" class="sw" role="radio" data-c="' + c + '" aria-label="اللون ' + (i + 1) + '" style="background:' + c + '"></button>'; }).join('') +
+      '<label class="sw" style="background:conic-gradient(red,yellow,lime,cyan,blue,magenta,red)" aria-label="لون مخصص"><input type="color" id="cc" value="' + color + '"></label>';
+    sw.addEventListener('click', function (e) { var b = e.target.closest('.sw[data-c]'); if (b) setColor(b.dataset.c); });
+    f.querySelector('#cc').addEventListener('input', function () { setColor(this.value); });
+    f.querySelector('#src').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) setMode(b.dataset.m); });
+    setMode(mode); setColor(color);
+
+    f.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var name = f.name.value.trim();
+      if (!name) { G.toast('أدخل اسم التطبيق.'); f.name.focus(); return; }
+      var fd = new FormData();
+      fd.append('source', mode); fd.append('name', name); fd.append('color', color);
+      fd.append('package', f.pkg.value.trim()); fd.append('contact', f.contact.value.trim());
+      if (mode === 'url') {
+        if (!f.url.value.trim()) { G.toast('أدخل رابط الموقع.'); f.url.focus(); return; }
+        fd.append('url', f.url.value.trim());
+      } else {
+        var z = f.zip.files[0];
+        if (!z) { G.toast('اختر ملف ZIP.'); return; }
+        if (!/\.zip$/i.test(z.name)) { G.toast('الملف ليس بصيغة ZIP.'); return; }
+        if (z.size > 50 * 1048576) { G.toast('الحجم أكبر من 50 ميغابايت.'); return; }
+        fd.append('zip', z);
+      }
+      if (f.icon.files[0]) {
+        if (f.icon.files[0].size > 10 * 1048576) { G.toast('الأيقونة أكبر من 10 ميغابايت.'); return; }
+        fd.append('icon', f.icon.files[0]);
+      }
+      var btn = document.getElementById('go'); btn.disabled = true; btn.textContent = 'جارٍ الإنشاء...';
+      G.api('/apps', { method: 'POST', form: fd }).then(function (r) {
+        G.toast('تم إنشاء التطبيق. اضغط «بناء» لتوليد الملف.');
+        location.hash = 'app/' + r.app.id;
+      }, function (er) { err(er); btn.disabled = false; btn.textContent = 'إنشاء التطبيق'; });
+    });
+    return Promise.resolve();
+  }
+
+  // ---------- تفاصيل تطبيق ----------
+  function renderApp(id) {
+    G.header('apps', me);
+    return G.api('/apps/' + id).then(function (r) {
+      var a = r.app, builds = r.builds;
+      var formats = me.limits.formats;
+      var busy = builds.some(function (b) { return b.status === 'queued' || b.status === 'building'; });
+      var h = '<p style="margin-bottom:12px"><a href="#apps">‹ تطبيقاتي</a></p>' +
+        '<div class="card"><div class="row" style="flex-wrap:nowrap">' + mark(a, 56) + '<div style="min-width:0;flex:1"><h1>' + esc(a.name) + '</h1><div class="mono muted">' + esc(a.package) + '</div></div>' +
+        (a.status === 'active' ? '<span class="pill ok">فعّال</span>' : '<span class="pill bad">موقوف</span>') + '</div>' +
+        '<div class="muted sm-t" style="margin-top:12px">' + (a.source === 'zip' ? 'ملفات مستضافة: <span class="mono">' + esc(a.siteUrl) + '</span>' : 'الرابط: <span class="mono">' + esc(a.url) + '</span>') +
+        ' · الإصدار الحالي: ' + esc(a.versionName) + ' (' + a.versionCode + ')</div></div>';
+      if (a.status !== 'active') h += '<div class="alert bad" style="margin-top:16px">هذا التطبيق موقوف من الإدارة. تظهر لمستخدميه رسالة التواصل مع المطوّر. تواصل معنا لمعرفة السبب.</div>';
+      h += '<div class="card"><h2 style="margin-bottom:12px">بناء التطبيق</h2><div class="row" style="align-items:flex-end"><div class="field"><label for="fmt">الصيغة</label><select class="inp" id="fmt">' +
+        '<option value="apk">APK (للتجربة والتوزيع المباشر)</option>' +
+        '<option value="aab"' + (formats.indexOf('aab') < 0 ? ' disabled' : '') + '>AAB (لرفعه على Google Play)' + (formats.indexOf('aab') < 0 ? ' — غير متاح في خطتك' : '') + '</option></select></div>' +
+        '<div class="field"><label for="vn">رقم الإصدار</label><input class="inp ltr" id="vn" value="' + esc(a.versionName) + '" style="max-width:120px"></div>' +
+        '<button class="btn pri" id="build"' + (busy || a.status !== 'active' ? ' disabled' : '') + '>بناء</button></div>' +
+        '<p class="hint" style="margin-top:10px">يزداد رقم الإصدار الداخلي (versionCode) تلقائياً مع كل بناء، وهذا ما تطلبه Google Play عند كل تحديث. أول بناء يستغرق وقتاً أطول.</p></div>';
+      h += '<div class="card"><h2 style="margin-bottom:12px">عمليات البناء</h2><div id="builds"></div></div>';
+      if (a.hasKey) {
+        h += '<div class="card"><h2 style="margin-bottom:8px">مفتاح التوقيع</h2><p class="sm-t muted">هذا المفتاح واحد لتطبيقك، ويُستعمل في كل تحديث. إن فقدته فلن تستطيع تحديث التطبيق على Google Play ولا على هواتف المستخدمين. حمّل نسخة واحتفظ بها مع كلمة المرور في مكان آمن.</p>' +
+          '<div class="keybox" style="margin-top:12px">كلمة المرور: <code>' + esc(a.keyPass) + '</code> · الاسم المستعار (alias): <code>upload</code></div>' +
+          '<p style="margin-top:12px"><a class="btn sm" href="/api/apps/' + a.id + '/keystore">تنزيل المفتاح (.jks)</a></p></div>';
+      }
+      h += '<div class="card"><h2 style="margin-bottom:12px">تعديل التطبيق</h2><form class="form" id="ed" novalidate>' +
+        '<div class="cols"><div class="field"><label for="en">الاسم</label><input class="inp" id="en" maxlength="30" value="' + esc(a.name) + '"></div>' +
+        (a.source === 'url' ? '<div class="field"><label for="eu">الرابط</label><input class="inp ltr" id="eu" value="' + esc(a.url) + '"></div>' : '<div class="field"><label for="ez">استبدال ملفات الموقع (ZIP)</label><input class="inp" id="ez" type="file" accept=".zip,application/zip"><span class="hint">يظهر التغيير فوراً دون إعادة بناء.</span></div>') + '</div>' +
+        '<div class="cols"><div class="field"><label for="ec">اللون</label><input class="inp" id="ec" type="color" value="' + esc(a.color) + '" style="padding:4px"></div>' +
+        '<div class="field"><label for="ei">أيقونة جديدة</label><input class="inp" id="ei" type="file" accept="image/png,image/jpeg,image/webp"></div></div>' +
+        '<div class="field"><label for="ect">نص التواصل عند انتهاء الاشتراك</label><input class="inp" id="ect" maxlength="200" value="' + esc(a.contact) + '"></div>' +
+        '<p class="hint">تغيير الاسم أو اللون أو الأيقونة أو نص التواصل أو الرابط يحتاج بناءً جديداً ليصل إلى التطبيق. ملفات الموقع تتحدث فوراً.</p>' +
+        '<div class="row"><button class="btn" type="submit" id="save">حفظ التعديلات</button></div></form></div>';
+      h += '<div class="card"><h2 style="margin-bottom:8px">حذف التطبيق</h2><p class="sm-t muted">يحذف التطبيق وملفاته ومفتاح توقيعه نهائياً، ويتوقف أي تطبيق منشور منه عن العمل.</p>' +
+        '<p style="margin-top:12px"><button class="btn danger sm" id="del">حذف التطبيق</button></p></div>';
+      view.innerHTML = h;
+      drawBuilds(a, builds);
+
+      document.getElementById('build').onclick = function () {
+        var btn = this; btn.disabled = true;
+        G.api('/apps/' + a.id + '/builds', { method: 'POST', body: { format: document.getElementById('fmt').value, versionName: document.getElementById('vn').value.trim() } })
+          .then(function () { G.toast('أُضيف إلى الطابور.'); return renderApp(id); }, function (e) { err(e); btn.disabled = false; });
+      };
+      document.getElementById('ed').onsubmit = function (e) {
+        e.preventDefault();
+        var fd = new FormData(); var btn = document.getElementById('save'); btn.disabled = true;
+        fd.append('name', document.getElementById('en').value.trim());
+        fd.append('color', document.getElementById('ec').value);
+        fd.append('contact', document.getElementById('ect').value.trim());
+        var eu = document.getElementById('eu'); if (eu) fd.append('url', eu.value.trim());
+        var ei = document.getElementById('ei'); if (ei.files[0]) fd.append('icon', ei.files[0]);
+        var ez = document.getElementById('ez');
+        var p = G.api('/apps/' + a.id, { method: 'PATCH', form: fd });
+        if (ez && ez.files[0]) {
+          var zf = new FormData(); zf.append('zip', ez.files[0]);
+          p = p.then(function () { return G.api('/apps/' + a.id + '/site', { method: 'POST', form: zf }); });
+        }
+        p.then(function () { G.toast('تم الحفظ.'); return renderApp(id); }, function (er) { err(er); btn.disabled = false; });
+      };
+      var del = document.getElementById('del');
+      del.onclick = function () {
+        if (del.dataset.sure !== '1') { del.dataset.sure = '1'; del.textContent = 'اضغط مرة أخرى للتأكيد النهائي'; return; }
+        G.api('/apps/' + a.id, { method: 'DELETE' }).then(function () { G.toast('تم الحذف.'); location.hash = 'apps'; }, err);
+      };
+      if (busy) {
+        pollT = setTimeout(function tick() {
+          G.api('/apps/' + id).then(function (r2) {
+            var still = r2.builds.some(function (b) { return b.status === 'queued' || b.status === 'building'; });
+            if (still) { drawBuilds(r2.app, r2.builds); pollT = setTimeout(tick, 3000); } else { renderApp(id); }
+          }, function () { pollT = setTimeout(tick, 6000); });
+        }, 3000);
+      }
+    });
+  }
+
+  function drawBuilds(a, builds) {
+    var box = document.getElementById('builds');
+    if (!builds.length) { box.innerHTML = '<p class="muted">لم تُبنَ نسخة بعد. اضغط «بناء» أعلاه.</p>'; return; }
+    box.innerHTML = builds.map(function (b) {
+      var s = '<div class="build"><div class="row between"><div class="row"><b>#' + b.id + '</b><span class="pill">' + b.format.toUpperCase() + '</span><span class="mono">v' + esc(b.versionName) + ' (' + b.versionCode + ')</span></div>' +
+        '<div class="row">' + G.pill(b.status) + '<span class="muted sm-t">' + G.dateTime(b.createdAt) + '</span></div></div>';
+      if (b.status === 'queued' || b.status === 'building') s += '<div class="indet"></div><p class="hint" style="margin-top:6px">' + (b.status === 'queued' ? 'بانتظار دوره في الطابور...' : 'جارٍ البناء. لا تغلق الصفحة، تتحدث الحالة تلقائياً.') + '</p>';
+      if (b.status === 'ready') {
+        s += '<div class="row" style="margin-top:12px">' +
+          (b.hasApk ? '<a class="btn sm pri" href="/api/builds/' + b.id + '/download/apk">تنزيل APK</a>' : '') +
+          (b.hasAab ? '<a class="btn sm pri" href="/api/builds/' + b.id + '/download/aab">تنزيل AAB</a>' : '') +
+          '<a class="btn sm" href="/api/builds/' + b.id + '/download/icon">أيقونة المتجر (512)</a></div>';
+      }
+      if (b.status === 'failed') s += '<div class="alert bad" style="margin-top:10px">' + esc(b.error || 'فشل البناء.') + '</div>';
+      s += '<p style="margin-top:10px"><button class="btn sm" data-log="' + b.id + '">' + (openDetails[b.id] ? 'إخفاء السجل' : 'سجل البناء') + '</button></p><div id="det' + b.id + '"></div></div>';
+      return s;
+    }).join('');
+    box.onclick = function (e) {
+      var t = e.target.closest('[data-log]'); if (!t) return;
+      var id = t.dataset.log;
+      if (openDetails[id]) { delete openDetails[id]; t.textContent = 'سجل البناء'; document.getElementById('det' + id).innerHTML = ''; return; }
+      openDetails[id] = 1; t.textContent = 'إخفاء السجل'; loadLog(id);
+    };
+    Object.keys(openDetails).forEach(loadLog);
+  }
+  function loadLog(id) {
+    var d = document.getElementById('det' + id); if (!d) return;
+    G.api('/builds/' + id).then(function (r) {
+      d.innerHTML = '<pre class="log">' + esc(r.build.log || 'لا يوجد سجل.') + '</pre>';
+    }, err);
+  }
+
+  // ---------- الاشتراك ----------
+  function renderPlan() {
+    G.header('plan', me);
+    return refreshMe().then(function () {
+      var lim = me.limits, exp = me.planExpires;
+      var h = '<div class="page-h"><h1>الاشتراك</h1></div><div class="card"><div class="row between"><div><span class="muted sm-t">خطتك الحالية</span><h2>' + esc(planName()) + '</h2></div>' +
+        (me.plan === 'free' ? '<span class="pill">مجانية دائماً</span>' : (me.effectivePlan === 'expired' ? '<span class="pill bad">منتهية في ' + G.date(exp) + '</span>' : '<span class="pill ok">تنتهي في ' + G.date(exp) + '</span>')) + '</div>' +
+        '<div class="cols" style="margin-top:16px"><div><div class="row between"><span class="sm-t">التطبيقات</span><span class="muted sm-t">' + me.usage.apps + ' / ' + lim.apps + '</span></div>' + meter(me.usage.apps, lim.apps) + '</div>' +
+        '<div><div class="row between"><span class="sm-t">البناء هذا الشهر</span><span class="muted sm-t">' + me.usage.builds + ' / ' + lim.builds + '</span></div>' + meter(me.usage.builds, lim.builds) + '</div></div></div>';
+      var plans = cfg.plans || {};
+      h += '<h2 style="margin:24px 0 12px">الخطط</h2><div class="plans">' + Object.keys(plans).map(function (k) {
+        var p = plans[k];
+        return '<div class="card' + (k === me.plan ? ' cur' : '') + '"><h3>' + esc(p.label) + (k === me.plan ? ' <span class="pill ok">خطتك</span>' : '') + '</h3><ul class="sm-t" style="padding-inline-start:18px;margin:10px 0 0"><li>' + p.apps + ' تطبيقات</li><li>' + p.builds + ' عملية بناء شهرياً</li><li>' + p.formats.map(function (x) { return x.toUpperCase(); }).join(' و ') + '</li></ul></div>';
+      }).join('') + '</div>';
+      h += '<div class="card" style="margin-top:20px"><h2 style="margin-bottom:8px">كيف أشترك أو أجدّد؟</h2><p>' + esc(cfg.payInstructions) + '</p>' +
+        '<p class="muted sm-t" style="margin-top:10px">البريد: <span class="mono" style="user-select:all">' + esc(cfg.supportEmail) + '</span></p>' +
+        '<p class="hint" style="margin-top:6px">أرسل بريد حسابك (<span class="mono">' + esc(me.email) + '</span>) واسم الخطة. نفعّل اشتراكك بعد تأكيد الدفع، فتظهر الخطة والتاريخ هنا.</p></div>';
+      view.innerHTML = h;
+    });
+  }
+
+  // ---------- التوجيه ----------
+  function route() {
+    clearTimeout(pollT);
+    var h = (location.hash || '#apps').slice(1);
+    var p;
+    if (h === 'new') p = renderNew();
+    else if (h === 'plan') p = renderPlan();
+    else if (h.indexOf('app/') === 0) p = renderApp(h.slice(4));
+    else p = renderApps();
+    p.catch(function (e) {
+      if (e.status === 401) { location.href = '/#login'; return; }
+      view.innerHTML = '<div class="card empty"><h3>تعذّر التحميل</h3><p>' + esc(e.message) + '</p><p style="margin-top:12px"><a class="btn" href="#apps">العودة</a></p></div>';
+    });
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener('hashchange', route);
+
+  Promise.all([G.me(), G.api('/config')]).then(function (r) {
+    me = r[0]; cfg = r[1];
+    if (!me) { location.href = '/#login'; return; }
+    route();
+  }, function (e) { view.innerHTML = '<div class="card empty"><h3>تعذّر الاتصال</h3><p>' + esc(e.message) + '</p></div>'; });
+})();
+</script>
+</body>
+</html>
