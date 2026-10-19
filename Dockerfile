@@ -1,6 +1,6 @@
 FROM node:18-bullseye
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     openjdk-17-jdk \
     wget \
     unzip \
